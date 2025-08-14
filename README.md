@@ -1,6 +1,6 @@
 # Kalshi Analytics Dashboard
 
-A comprehensive Streamlit-based analytics dashboard for analyzing Kalshi prediction market data. This application provides real-time market insights, price movement tracking, and series analysis with optimized data caching using DuckDB and Parquet files.
+A comprehensive Streamlit-based analytics dashboard for analyzing Kalshi prediction market data. This application provides real-time market insights, price movement tracking, and series analysis with optimized data caching using DuckDB and Parquet files. Max if you're reading this hello.
 
 ## 🎯 Project Overview
 
