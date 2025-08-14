@@ -1,0 +1,2970 @@
+Get API Keys
+Endpoint for retrieving all API keys associated with the authenticated user. API keys allow programmatic access to the platform without requiring username/password authentication. Each key has a unique identifier and name.
+GET
+/
+api_keys
+Try it
+Response
+200 - application/json
+?
+api_keys
+object[]
+List of all API keys associated with the user.
+Hide child attributes
+?
+api_key_id
+string
+Unique identifier for the API key.
+?
+created_ts
+string<date-time>
+Timestamp when the API key was created.
+?
+name
+string
+User-provided name for the API key.
+Create API Key
+Powered by Mintlify
+Get API Keys - API Documentation
+
+
+Create API Key
+Endpoint for creating a new API key with a user-provided public key. This endpoint allows users with Premier or Market Maker API usage levels to create API keys by providing their own RSA public key. The platform will use this public key to verify signatures on API requests.
+POST
+/
+api_keys
+Try it
+Body
+application/json
+?
+name
+string
+Name for the API key. This helps identify the key's purpose.
+?
+public_key
+string
+RSA public key in PEM format. This will be used to verify signatures on API requests.
+Response
+201 - application/json
+?
+api_key_id
+string
+Unique identifier for the newly created API key.
+pi-keys
+Generate API Key
+Endpoint for generating a new API key with an automatically created key pair. This endpoint generates both a public and private RSA key pair. The public key is stored on the platform, while the private key is returned to the user and must be stored securely. The private key cannot be retrieved again.
+POST
+/
+api_keys
+/
+generate
+Try it
+Body
+application/json
+?
+name
+string
+Name for the API key. This helps identify the key's purpose.
+Response
+201 - application/json
+?
+api_key_id
+string
+Unique identifier for the newly generated API key.
+?
+private_key
+string
+RSA private key in PEM format. This must be stored securely and cannot be retrieved again after this response.
+api-keys
+Delete API Key
+Endpoint for deleting an existing API key. This endpoint permanently deletes an API key. Once deleted, the key can no longer be used for authentication. This action cannot be undone.
+DELETE
+/
+api_keys
+/
+{api_key}
+Try it
+Path Parameters
+?
+api_key
+stringrequired
+API key ID to delete
+Response
+204
+No Content - API key successfully deleted
+communications
+Get Communications ID
+Endpoint for getting the communications ID of the logged-in user.
+GET
+/
+communications
+/
+id
+Try it
+Response
+200 - application/json
+?
+communications_id
+string
+A public communications ID which is used to identify the user.
+communications
+Get Quotes
+Endpoint for getting quotes
+GET
+/
+communications
+/
+quotes
+Try it
+Response
+200 - application/json
+?
+cursor
+string
+Cursor for pagination to get the next page of results.
+?
+quotes
+object[]
+List of quotes matching the query criteria.
+Hide child attributes
+?
+accepted_side
+string
+The side that was accepted (yes or no).
+?
+accepted_ts
+string<date-time>
+Timestamp when the quote was accepted.
+?
+cancellation_reason
+string
+Reason for quote cancellation if cancelled.
+?
+cancelled_ts
+string<date-time>
+Timestamp when the quote was cancelled.
+?
+confirmed_ts
+string<date-time>
+Timestamp when the quote was confirmed.
+?
+contracts
+integer
+Number of contracts in the quote.
+?
+created_ts
+string<date-time>
+Timestamp when the quote was created.
+?
+creator_id
+string
+Public communications ID of the quote creator.
+?
+creator_order_id
+string
+Order ID for the quote creator (private field).
+?
+creator_user_id
+string
+User ID of the quote creator (private field).
+?
+executed_ts
+string<date-time>
+Timestamp when the quote was executed.
+?
+id
+string
+Unique identifier for the quote.
+?
+market_ticker
+string
+The ticker of the market this quote is for.
+?
+no_bid
+integer
+Bid price for NO contracts, in cents.
+?
+rest_remainder
+boolean
+Whether to rest the remainder of the quote after execution.
+?
+rfq_creator_id
+string
+Public communications ID of the RFQ creator.
+?
+rfq_creator_order_id
+string
+Order ID for the RFQ creator (private field).
+?
+rfq_creator_user_id
+string
+User ID of the RFQ creator (private field).
+?
+rfq_id
+string
+ID of the RFQ this quote is responding to.
+?
+status
+string
+Current status of the quote.
+?
+updated_ts
+string<date-time>
+Timestamp when the quote was last updated.
+?
+yes_bid
+integer
+Bid price for YES contracts, in cents.
+Get Communications ID
+Create Quote
+Powered by Mintlify
+Get Quotes - API Documentation
+
+
+communications
+Create Quote
+Endpoint for creating a quote in response to an RFQ
+POST
+/
+communications
+/
+quotes
+Try it
+Body
+application/json
+?
+no_bid
+integer
+The bid price for NO contracts, in cents.
+?
+rest_remainder
+boolean
+Whether to rest the remainder of the quote after execution.
+?
+rfq_id
+string
+The ID of the RFQ to quote on.
+?
+yes_bid
+integer
+The bid price for YES contracts, in cents.
+Response
+201 - application/json
+?
+id
+string
+The ID of the newly created quote.
+communications
+Get Quote
+Endpoint for getting a particular quote
+GET
+/
+communications
+/
+quotes
+/
+{quote_id}
+Try it
+Path Parameters
+?
+quote_id
+stringrequired
+Quote ID
+Response
+200 - application/json
+?
+quote
+object
+The details of the requested quote.
+Hide child attributes
+?
+quote.accepted_side
+string
+The side that was accepted (yes or no).
+?
+quote.accepted_ts
+string<date-time>
+Timestamp when the quote was accepted.
+?
+quote.cancellation_reason
+string
+Reason for quote cancellation if cancelled.
+?
+quote.cancelled_ts
+string<date-time>
+Timestamp when the quote was cancelled.
+?
+quote.confirmed_ts
+string<date-time>
+Timestamp when the quote was confirmed.
+?
+quote.contracts
+integer
+Number of contracts in the quote.
+?
+quote.created_ts
+string<date-time>
+Timestamp when the quote was created.
+?
+quote.creator_id
+string
+Public communications ID of the quote creator.
+?
+quote.creator_order_id
+string
+Order ID for the quote creator (private field).
+?
+quote.creator_user_id
+string
+User ID of the quote creator (private field).
+?
+quote.executed_ts
+string<date-time>
+Timestamp when the quote was executed.
+?
+quote.id
+string
+Unique identifier for the quote.
+?
+quote.market_ticker
+string
+The ticker of the market this quote is for.
+?
+quote.no_bid
+integer
+Bid price for NO contracts, in cents.
+?
+quote.rest_remainder
+boolean
+Whether to rest the remainder of the quote after execution.
+?
+quote.rfq_creator_id
+string
+Public communications ID of the RFQ creator.
+?
+quote.rfq_creator_order_id
+string
+Order ID for the RFQ creator (private field).
+?
+quote.rfq_creator_user_id
+string
+User ID of the RFQ creator (private field).
+?
+quote.rfq_id
+string
+ID of the RFQ this quote is responding to.
+?
+quote.status
+string
+Current status of the quote.
+?
+quote.updated_ts
+string<date-time>
+Timestamp when the quote was last updated.
+?
+quote.yes_bid
+integer
+Bid price for YES contracts, in cents.
+Create Quote
+Delete Quote
+Powered by Mintlify
+Get Quote - API Documentation
+communications
+Delete Quote
+Endpoint for deleting a quote, which means it can no longer be accepted.
+DELETE
+/
+communications
+/
+quotes
+/
+{quote_id}
+Try it
+Path Parameters
+?
+quote_id
+stringrequired
+Quote ID
+Response
+204
+No Content
+communications
+Accept Quote
+Endpoint for accepting a quote. This will require the quoter to confirm
+PUT
+/
+communications
+/
+quotes
+/
+{quote_id}
+/
+accept
+Try it
+Path Parameters
+?
+quote_id
+stringrequired
+Quote ID
+Body
+application/json
+?
+accepted_side
+enum<string>
+The side of the quote to accept (yes or no).
+Available options: yes, no
+Response
+204
+No Content
+communications
+Confirm Quote
+Endpoint for confirming a quote. This will start a timer for order execution
+PUT
+/
+communications
+/
+quotes
+/
+{quote_id}
+/
+confirm
+Try it
+Path Parameters
+?
+quote_id
+stringrequired
+Quote ID
+Response
+204
+No Content
+Get RFQs
+Endpoint for getting RFQs
+GET
+/
+communications
+/
+rfqs
+Try it
+Response
+200 - application/json
+?
+cursor
+string
+Cursor for pagination to get the next page of results.
+?
+rfqs
+object[]
+List of RFQs matching the query criteria.
+Hide child attributes
+?
+cancellation_reason
+string
+Reason for RFQ cancellation if cancelled.
+?
+cancelled_ts
+string<date-time>
+Timestamp when the RFQ was cancelled.
+?
+contracts
+integer
+Number of contracts requested in the RFQ.
+?
+created_ts
+string<date-time>
+Timestamp when the RFQ was created.
+?
+creator_id
+string
+Public communications ID of the RFQ creator.
+?
+creator_user_id
+string
+User ID of the RFQ creator (private field).
+?
+id
+string
+Unique identifier for the RFQ.
+?
+market_ticker
+string
+The ticker of the market this RFQ is for.
+?
+rest_remainder
+boolean
+Whether to rest the remainder of the RFQ after execution.
+?
+status
+string
+Current status of the RFQ (open, closed).
+?
+updated_ts
+string<date-time>
+Timestamp when the RFQ was last updated.
+Confirm Quote
+Create RFQ
+Powered by Mintlify
+Get RFQs - API Documentation
+communications
+Create RFQ
+Endpoint for creating a new RFQ
+POST
+/
+communications
+/
+rfqs
+Try it
+Body
+application/json
+?
+contracts
+integer
+The number of contracts for the RFQ.
+Required range: x >= 1
+?
+market_ticker
+string
+The ticker of the market for which to create an RFQ.
+?
+rest_remainder
+boolean
+Whether to rest the remainder of the RFQ after execution.
+Response
+201 - application/json
+?
+id
+string
+The ID of the newly created RFQ.
+communications
+Get RFQ
+Endpoint for getting a single RFQ by id
+GET
+/
+communications
+/
+rfqs
+/
+{rfq_id}
+Try it
+Path Parameters
+?
+rfq_id
+stringrequired
+RFQ ID
+Response
+200 - application/json
+?
+rfq
+object
+The details of the requested RFQ.
+Hide child attributes
+?
+rfq.cancellation_reason
+string
+Reason for RFQ cancellation if cancelled.
+?
+rfq.cancelled_ts
+string<date-time>
+Timestamp when the RFQ was cancelled.
+?
+rfq.contracts
+integer
+Number of contracts requested in the RFQ.
+?
+rfq.created_ts
+string<date-time>
+Timestamp when the RFQ was created.
+?
+rfq.creator_id
+string
+Public communications ID of the RFQ creator.
+?
+rfq.creator_user_id
+string
+User ID of the RFQ creator (private field).
+?
+rfq.id
+string
+Unique identifier for the RFQ.
+?
+rfq.market_ticker
+string
+The ticker of the market this RFQ is for.
+?
+rfq.rest_remainder
+boolean
+Whether to rest the remainder of the RFQ after execution.
+?
+rfq.status
+string
+Current status of the RFQ (open, closed).
+?
+rfq.updated_ts
+string<date-time>
+Timestamp when the RFQ was last updated.
+Create RFQ
+Delete RFQ
+Powered by Mintlify
+Get RFQ - API Documentation
+
+communications
+Delete RFQ
+Endpoint for deleting an RFQ by ID
+DELETE
+/
+communications
+/
+rfqs
+/
+{rfq_id}
+Try it
+Path Parameters
+?
+rfq_id
+stringrequired
+RFQ ID
+Response
+204
+No Content
+
+market
+Get Events
+Endpoint for getting data about all events. An event represents a real-world occurrence that can be traded on, such as an election, sports game, or economic indicator release. Events contain one or more markets where users can place trades on different outcomes. This endpoint returns a paginated response. Use the  limit  parameter to control page size (1-200, defaults to 100). The response includes a  cursor  field - pass this value in the  cursor  parameter of your next request to get the next page. An empty cursor indicates no more pages are available.
+GET
+/
+events
+Try it
+Query Parameters
+?
+limit
+integer
+Parameter to specify the number of results per page. Defaults to 100. Maximum value is 200.
+?
+cursor
+string
+Parameter to specify the pagination cursor. Use the cursor value returned from the previous response to get the next page of results. Leave empty for the first page.
+?
+with_nested_markets
+boolean
+Parameter to specify if nested markets should be included in the response. When true, each event will include a 'markets' field containing a list of Market objects associated with that event.
+?
+status
+string
+Filter by event status. Possible values: 'open', 'closed', 'settled'. Leave empty to return events with any status.
+?
+series_ticker
+string
+Filter events by series ticker. Returns only events belonging to the specified series.
+Response
+200 - application/json
+?
+cursor
+string
+Pagination cursor for the next page. Empty if there are no more results.
+?
+events
+object[]
+Array of events matching the query criteria.
+Hide child attributes
+?
+category
+string
+Event category (deprecated, use series-level category instead).
+?
+collateral_return_type
+string
+Specifies how collateral is returned when markets settle (e.g., 'binary' for standard yes/no markets).
+?
+event_ticker
+string
+Unique identifier for this event.
+?
+markets
+object[]
+Array of markets associated with this event. Only populated when 'with_nested_markets=true' is specified in the request.
+Show child attributes
+?
+mutually_exclusive
+boolean
+If true, only one market in this event can resolve to 'yes'. If false, multiple markets can resolve to 'yes'.
+?
+series_ticker
+string
+Unique identifier for the series this event belongs to.
+?
+strike_date
+any
+The specific date this event is based on. Only filled when the event uses a date strike (mutually exclusive with strike_period).
+?
+strike_period
+string
+The time period this event covers (e.g., 'week', 'month'). Only filled when the event uses a period strike (mutually exclusive with strike_date).
+?
+sub_title
+string
+Shortened descriptive title for the event.
+?
+title
+string
+Full title of the event (deprecated, use sub_title instead).
+Delete RFQ
+Get Event
+Powered by Mintlify
+Get Events - API Documentation
+
+market
+Get Event
+Endpoint for getting data about an event by its ticker. An event represents a real-world occurrence that can be traded on, such as an election, sports game, or economic indicator release. Events contain one or more markets where users can place trades on different outcomes.
+GET
+/
+events
+/
+{event_ticker}
+Try it
+Path Parameters
+?
+event_ticker
+stringrequired
+Event ticker
+Response
+200 - application/json
+?
+event
+object
+Show child attributes
+?
+markets
+object[]
+Hide child attributes
+?
+ticker
+stringrequired
+Unique identifier for markets
+?
+event_ticker
+stringrequired
+Unique identifier for events
+?
+market_type
+stringrequired
+Type of market (binary, scalar)
+?
+subtitle
+stringrequired
+Shortened title for this market
+?
+yes_sub_title
+stringrequired
+Shortened title for the yes side
+?
+no_sub_title
+stringrequired
+Shortened title for the no side
+?
+open_time
+string<date-time>required
+Time when trading begins
+?
+close_time
+string<date-time>required
+Time when trading ends
+?
+expiration_time
+string<date-time>required
+Time when market expires
+?
+latest_expiration_time
+string<date-time>required
+Latest possible expiration time
+?
+settlement_timer_seconds
+integerrequired
+Settlement timer in seconds
+?
+status
+stringrequired
+Current market status
+?
+response_price_units
+stringrequired
+Price units for response
+?
+notional_value
+integerrequired
+Notional value of contract
+?
+tick_size
+integerrequired
+Minimum price movement
+?
+yes_bid
+integerrequired
+Highest YES buy offer price
+?
+yes_ask
+integerrequired
+Lowest YES sell offer price
+?
+no_bid
+integerrequired
+Highest NO buy offer price
+?
+no_ask
+integerrequired
+Lowest NO sell offer price
+?
+last_price
+integerrequired
+Last traded price
+?
+previous_yes_bid
+integerrequired
+Previous YES bid price
+?
+previous_yes_ask
+integerrequired
+Previous YES ask price
+?
+previous_price
+integerrequired
+Previous traded price
+?
+volume
+integerrequired
+Trading volume
+?
+volume_24h
+integerrequired
+24h trading volume
+?
+liquidity
+integerrequired
+Current liquidity
+?
+open_interest
+integerrequired
+Open interest
+?
+result
+stringrequired
+Settlement result
+?
+can_close_early
+booleanrequired
+Whether market can close early
+?
+expiration_value
+stringrequired
+Expiration value
+?
+category
+stringrequired
+Market category
+?
+risk_limit_cents
+integerrequired
+Risk limit in cents
+?
+rules_primary
+stringrequired
+Primary market rules
+?
+rules_secondary
+stringrequired
+Secondary market rules
+?
+title
+string
+Full title describing this market
+Get Events
+Get Markets
+Powered by Mintlify
+Get Event - API Documentation
+
+market
+Get Markets
+Endpoint for listing and discovering markets on Kalshi. A market represents a specific binary outcome within an event that users can trade on (e.g.,  Will candidate X win? ). Markets have yes/no positions, current prices, volume, and settlement rules. This endpoint returns a paginated response. Use the  limit  parameter to control page size (1-1000, defaults to 100). The response includes a  cursor  field - pass this value in the  cursor  parameter of your next request to get the next page. An empty cursor indicates no more pages are available.
+GET
+/
+markets
+Try it
+Query Parameters
+?
+limit
+integer
+Number of results per page. Defaults to 100. Maximum value is 1000.
+?
+cursor
+string
+Pagination cursor. Use the cursor value returned from the previous response to get the next page of results. Leave empty for the first page.
+?
+event_ticker
+string
+Filter markets by event ticker. Returns only markets belonging to the specified event.
+?
+series_ticker
+string
+Filter markets by series ticker. Returns only markets belonging to events in the specified series.
+?
+max_close_ts
+integer
+Filter markets that close before this Unix timestamp.
+?
+min_close_ts
+integer
+Filter markets that close after this Unix timestamp.
+?
+status
+string
+Filter by market status. Comma-separated list. Possible values: 'unopened', 'open', 'closed', 'settled'. Leave empty to return markets with any status.
+?
+tickers
+string
+Filter by specific market tickers. Comma-separated list of market tickers to retrieve.
+Response
+200 - application/json
+?
+cursor
+string
+?
+markets
+object[]
+Hide child attributes
+?
+ticker
+stringrequired
+Unique identifier for markets
+?
+event_ticker
+stringrequired
+Unique identifier for events
+?
+market_type
+stringrequired
+Type of market (binary, scalar)
+?
+subtitle
+stringrequired
+Shortened title for this market
+?
+yes_sub_title
+stringrequired
+Shortened title for the yes side
+?
+no_sub_title
+stringrequired
+Shortened title for the no side
+?
+open_time
+string<date-time>required
+Time when trading begins
+?
+close_time
+string<date-time>required
+Time when trading ends
+?
+expiration_time
+string<date-time>required
+Time when market expires
+?
+latest_expiration_time
+string<date-time>required
+Latest possible expiration time
+?
+settlement_timer_seconds
+integerrequired
+Settlement timer in seconds
+?
+status
+stringrequired
+Current market status
+?
+response_price_units
+stringrequired
+Price units for response
+?
+notional_value
+integerrequired
+Notional value of contract
+?
+tick_size
+integerrequired
+Minimum price movement
+?
+yes_bid
+integerrequired
+Highest YES buy offer price
+?
+yes_ask
+integerrequired
+Lowest YES sell offer price
+?
+no_bid
+integerrequired
+Highest NO buy offer price
+?
+no_ask
+integerrequired
+Lowest NO sell offer price
+?
+last_price
+integerrequired
+Last traded price
+?
+previous_yes_bid
+integerrequired
+Previous YES bid price
+?
+previous_yes_ask
+integerrequired
+Previous YES ask price
+?
+previous_price
+integerrequired
+Previous traded price
+?
+volume
+integerrequired
+Trading volume
+?
+volume_24h
+integerrequired
+24h trading volume
+?
+liquidity
+integerrequired
+Current liquidity
+?
+open_interest
+integerrequired
+Open interest
+?
+result
+stringrequired
+Settlement result
+?
+can_close_early
+booleanrequired
+Whether market can close early
+?
+expiration_value
+stringrequired
+Expiration value
+?
+category
+stringrequired
+Market category
+?
+risk_limit_cents
+integerrequired
+Risk limit in cents
+?
+rules_primary
+stringrequired
+Primary market rules
+?
+rules_secondary
+stringrequired
+Secondary market rules
+?
+title
+string
+Full title describing this market
+Get Event
+Get Trades
+Powered by Mintlify
+Get Markets - API Documentation
+
+market
+Get Trades
+Endpoint for getting all trades for all markets. A trade represents a completed transaction between two users on a specific market. Each trade includes the market ticker, price, quantity, and timestamp information. This endpoint returns a paginated response. Use the  limit  parameter to control page size (1-1000, defaults to 100). The response includes a  cursor  field - pass this value in the  cursor  parameter of your next request to get the next page. An empty cursor indicates no more pages are available.
+GET
+/
+markets
+/
+trades
+Try it
+Query Parameters
+?
+limit
+integer
+Number of results per page. Defaults to 100. Maximum value is 1000.
+?
+cursor
+string
+Pagination cursor. Use the cursor value returned from the previous response to get the next page of results. Leave empty for the first page.
+?
+ticker
+string
+Filter trades by market ticker. Returns only trades for the specified market.
+?
+min_ts
+integer
+Filter trades that occurred after this Unix timestamp.
+?
+max_ts
+integer
+Filter trades that occurred before this Unix timestamp.
+Response
+200 - application/json
+?
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned here in the cursor query parameter for this end-point to get the next page containing limit records. An empty value of this field indicates there is no next page.
+?
+trades
+object[]
+List of public trades.
+Hide child attributes
+?
+count
+integer
+Number of contracts bought or sold in this trade.
+?
+created_time
+any
+Timestamp when this trade was executed.
+?
+no_price
+integer
+No price for this trade in cents.
+?
+taker_side
+string
+Side for the taker of this trade.
+?
+ticker
+string
+Unique identifier for the market.
+?
+trade_id
+string
+Unique identifier for this trade.
+?
+yes_price
+integer
+Yes price for this trade in cents.
+Get Markets
+Get Market
+Powered by Mintlify
+Get Trades - API Documentation
+
+
+market
+Get Market
+Endpoint for getting data about a specific market by its ticker. A market represents a specific binary outcome within an event that users can trade on (e.g.,  Will candidate X win? ). Markets have yes/no positions, current prices, volume, and settlement rules.
+GET
+/
+markets
+/
+{ticker}
+Try it
+Path Parameters
+?
+ticker
+stringrequired
+Market ticker - unique identifier for the specific market
+Response
+200 - application/json
+?
+market
+object
+Contains information about a market
+Hide child attributes
+?
+market.ticker
+stringrequired
+Unique identifier for markets
+?
+market.event_ticker
+stringrequired
+Unique identifier for events
+?
+market.market_type
+stringrequired
+Type of market (binary, scalar)
+?
+market.subtitle
+stringrequired
+Shortened title for this market
+?
+market.yes_sub_title
+stringrequired
+Shortened title for the yes side
+?
+market.no_sub_title
+stringrequired
+Shortened title for the no side
+?
+market.open_time
+string<date-time>required
+Time when trading begins
+?
+market.close_time
+string<date-time>required
+Time when trading ends
+?
+market.expiration_time
+string<date-time>required
+Time when market expires
+?
+market.latest_expiration_time
+string<date-time>required
+Latest possible expiration time
+?
+market.settlement_timer_seconds
+integerrequired
+Settlement timer in seconds
+?
+market.status
+stringrequired
+Current market status
+?
+market.response_price_units
+stringrequired
+Price units for response
+?
+market.notional_value
+integerrequired
+Notional value of contract
+?
+market.tick_size
+integerrequired
+Minimum price movement
+?
+market.yes_bid
+integerrequired
+Highest YES buy offer price
+?
+market.yes_ask
+integerrequired
+Lowest YES sell offer price
+?
+market.no_bid
+integerrequired
+Highest NO buy offer price
+?
+market.no_ask
+integerrequired
+Lowest NO sell offer price
+?
+market.last_price
+integerrequired
+Last traded price
+?
+market.previous_yes_bid
+integerrequired
+Previous YES bid price
+?
+market.previous_yes_ask
+integerrequired
+Previous YES ask price
+?
+market.previous_price
+integerrequired
+Previous traded price
+?
+market.volume
+integerrequired
+Trading volume
+?
+market.volume_24h
+integerrequired
+24h trading volume
+?
+market.liquidity
+integerrequired
+Current liquidity
+?
+market.open_interest
+integerrequired
+Open interest
+?
+market.result
+stringrequired
+Settlement result
+?
+market.can_close_early
+booleanrequired
+Whether market can close early
+?
+market.expiration_value
+stringrequired
+Expiration value
+?
+market.category
+stringrequired
+Market category
+?
+market.risk_limit_cents
+integerrequired
+Risk limit in cents
+?
+market.rules_primary
+stringrequired
+Primary market rules
+?
+market.rules_secondary
+stringrequired
+Secondary market rules
+?
+market.title
+string
+Full title describing this market
+Get Trades
+Get Market Order Book
+Powered by Mintlify
+Get Market - API Documentation
+
+market
+Get Market Order Book
+Endpoint for getting the current order book for a specific market. The order book shows all active bid orders for both yes and no sides of a binary market. It returns yes bids and no bids only (no asks are returned). This is because in binary markets, a bid for yes at price X is equivalent to an ask for no at price (100-X). For example, a yes bid at 7  is the same as a no ask at 93 , with identical contract sizes. Each side shows price levels with their corresponding quantities and order counts, organized from best to worst prices.
+GET
+/
+markets
+/
+{ticker}
+/
+orderbook
+Try it
+Path Parameters
+?
+ticker
+stringrequired
+Market ticker - unique identifier for the specific market
+Query Parameters
+?
+depth
+integer
+Maximum number of price levels to return per side (yes bids/no bids). Defaults to all levels. Maximum value is 100.
+Response
+200 - application/json
+?
+orderbook
+object
+The current order book showing yes and no price levels with their respective quantities.
+Hide child attributes
+?
+orderbook.no
+integer[][]
+Array of price levels for no orders. Each level is [price, quantity] where price is in cents or centicents based on use_centi_cent parameter.
+Array of 2 integers representing [cents, contract_count].
+?
+orderbook.yes
+integer[][]
+Array of price levels for yes orders. Each level is [price, quantity] where price is in cents or centicents based on use_centi_cent parameter.
+Get Market
+Get Series List
+Powered by Mintlify
+Get Market Order Book - API Documentation
+
+market
+Get Series List
+Endpoint for getting data about multiple series with specified filters. A series represents a template for recurring events that follow the same format and rules (e.g.,  Monthly Jobs Report ,  Weekly Initial Jobless Claims ,  Daily Weather in NYC ). This endpoint allows you to browse and discover available series templates by category.
+GET
+/
+series
+Try it
+Query Parameters
+?
+category
+stringrequired
+Filter series by category. Returns only series belonging to the specified category.
+?
+include_product_metadata
+boolean
+Include additional product metadata in the response for each series.
+Response
+200 - application/json
+?
+series
+object[]
+List of series data.
+Hide child attributes
+?
+additional_prohibitions
+string[]
+AdditionalProhibitions is a list of additional trading prohibitions for this series.
+?
+category
+string
+Category specifies the category which this series belongs to.
+?
+contract_terms_url
+string
+ContractTermsUrl is the URL to the current terms of the contract underlying the series.
+?
+contract_url
+string
+ContractUrl provides a direct link to the original filing of the contract which underlies the series.
+?
+fee_multiplier
+number
+FeeMultiplier is a floating point multiplier applied to the fee calculations.
+?
+fee_type
+enum<string>
+FeeType is a string representing the series' fee structure. Fee structures can be found at https://kalshi.com/docs/kalshi-fee-schedule.pdf. 'quadratic' is described by the General Trading Fees Table, 'quadratic_with_maker_fees' is described by the General Trading Fees Table with maker fees described in the Maker Fees section, 'flat' is described by the Specific Trading Fees Table.
+Available options: quadratic, quadratic_with_maker_fees, flat
+?
+frequency
+string
+Description of the frequency of the series. There is no fixed value set here, but will be something human-readable like: weekly, daily, one-off.
+?
+product_metadata
+object
+Internal product metadata of the series.
+Show child attributes
+?
+settlement_sources
+object[]
+SettlementSources specifies the official sources used for the determination of markets within the series. Methodology is defined in the rulebook.
+Show child attributes
+?
+tags
+string[]
+Tags specifies the subjects that this series relates to, multiple series from different categories can have the same tags.
+?
+ticker
+string
+Ticker that identifies this series.
+?
+title
+string
+Title describing the series. For full context use you should use this field with the title field of the events belonging to this series.
+Get Market Order Book
+Get Series
+Powered by Mintlify
+Get Series List - API Documentation
+
+market
+Get Series
+Endpoint for getting data about a specific series by its ticker. A series represents a template for recurring events that follow the same format and rules (e.g.,  Monthly Jobs Report ,  Weekly Initial Jobless Claims ,  Daily Weather in NYC ). Series define the structure, settlement sources, and metadata that will be applied to each recurring event instance within that series.
+GET
+/
+series
+/
+{series_ticker}
+Try it
+Path Parameters
+?
+series_ticker
+stringrequired
+Series ticker - unique identifier for the specific series
+Response
+200 - application/json
+?
+series
+object
+Data for the series.
+Hide child attributes
+?
+series.additional_prohibitions
+string[]
+AdditionalProhibitions is a list of additional trading prohibitions for this series.
+?
+series.category
+string
+Category specifies the category which this series belongs to.
+?
+series.contract_terms_url
+string
+ContractTermsUrl is the URL to the current terms of the contract underlying the series.
+?
+series.contract_url
+string
+ContractUrl provides a direct link to the original filing of the contract which underlies the series.
+?
+series.fee_multiplier
+number
+FeeMultiplier is a floating point multiplier applied to the fee calculations.
+?
+series.fee_type
+enum<string>
+FeeType is a string representing the series' fee structure. Fee structures can be found at https://kalshi.com/docs/kalshi-fee-schedule.pdf. 'quadratic' is described by the General Trading Fees Table, 'quadratic_with_maker_fees' is described by the General Trading Fees Table with maker fees described in the Maker Fees section, 'flat' is described by the Specific Trading Fees Table.
+Available options: quadratic, quadratic_with_maker_fees, flat
+?
+series.frequency
+string
+Description of the frequency of the series. There is no fixed value set here, but will be something human-readable like: weekly, daily, one-off.
+?
+series.product_metadata
+object
+Internal product metadata of the series.
+Show child attributes
+?
+series.settlement_sources
+object[]
+SettlementSources specifies the official sources used for the determination of markets within the series. Methodology is defined in the rulebook.
+Show child attributes
+?
+series.tags
+string[]
+Tags specifies the subjects that this series relates to, multiple series from different categories can have the same tags.
+?
+series.ticker
+string
+Ticker that identifies this series.
+?
+series.title
+string
+Title describing the series. For full context use you should use this field with the title field of the events belonging to this series.
+Get Series List
+Get Market Candlesticks
+Powered by Mintlify
+Get Series - API Documentation
+
+market
+Get Market Candlesticks
+Endpoint for getting historical candlestick data for a specific market. Candlesticks provide OHLC (Open, High, Low, Close) price data aggregated over specific time intervals. Each candlestick represents the price movement during that period, including opening and closing prices, as well as the highest and lowest prices reached. The period_interval determines the time length of each candlestick and must be one of: 1 (1 minute), 60 (1 hour), or 1440 (1 day). The start_ts and end_ts parameters define the time range for the data.
+GET
+/
+series
+/
+{series_ticker}
+/
+markets
+/
+{ticker}
+/
+candlesticks
+Try it
+Path Parameters
+?
+series_ticker
+stringrequired
+Series ticker - the series that contains the target market
+?
+ticker
+stringrequired
+Market ticker - unique identifier for the specific market
+Query Parameters
+?
+start_ts
+integerrequired
+Start timestamp (Unix timestamp). Candlesticks will include those ending on or after this time.
+?
+end_ts
+integerrequired
+End timestamp (Unix timestamp). Candlesticks will include those ending on or before this time.
+?
+period_interval
+integerrequired
+Time period length of each candlestick in minutes. Valid values: 1 (1 minute), 60 (1 hour), 1440 (1 day).
+Response
+200 - application/json
+?
+candlesticks
+object[]
+Array of candlestick data points for the specified time range.
+Hide child attributes
+?
+end_period_ts
+integer
+Unix timestamp for the inclusive end of the candlestick period.
+?
+open_interest
+integer
+Number of contracts bought on the market by end of the candlestick period (end_period_ts).
+?
+price
+object
+Open, high, low, close (OHLC) and more data for trade YES contract prices on the market during the candlestick period.
+Show child attributes
+?
+volume
+integer
+Number of contracts bought on the market during the candlestick period.
+?
+yes_ask
+object
+Open, high, low, close (OHLC) data for YES sell offers on the market during the candlestick period.
+Hide child attributes
+?
+yes_ask.close
+integer
+Offer price on the market at the end of the candlestick period.
+?
+yes_ask.high
+integer
+Highest offer price on the market during the candlestick period.
+?
+yes_ask.low
+integer
+Lowest offer price on the market during the candlestick period.
+?
+yes_ask.open
+integer
+Offer price on the market at the start of the candlestick period.
+?
+yes_bid
+object
+Open, high, low, close (OHLC) data for YES buy offers on the market during the candlestick period.
+Hide child attributes
+?
+yes_bid.close
+integer
+Offer price on the market at the end of the candlestick period.
+?
+yes_bid.high
+integer
+Highest offer price on the market during the candlestick period.
+?
+yes_bid.low
+integer
+Lowest offer price on the market during the candlestick period.
+?
+yes_bid.open
+integer
+Offer price on the market at the start of the candlestick period.
+?
+ticker
+string
+Unique identifier for the market.
+Get Series
+Get Exchange Announcements
+Powered by Mintlify
+Get Market Candlesticks - API Documentation
+
+collection
+Get Multivariate Event Collections
+Endpoint for getting data about multivariate event collections.
+GET
+/
+multivariate_event_collections
+Try it
+Response
+200 - application/json
+?
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned here in the cursor query parameter for this end-point to get the next page containing limit records. An empty value of this field indicates there is no next page.
+?
+multivariate_contracts
+object[]
+List of multivariate event collections.
+Hide child attributes
+?
+associated_event_tickers
+string[]
+A list of events associated with the collection. Markets in these events can be passed as inputs to the Lookup and Create endpoints.
+?
+close_date
+string<date-time>
+The close date of the collection. After this time, the collection cannot be interacted with.
+?
+collection_ticker
+string
+Unique identifier for the collection.
+?
+description
+string
+Short description of the collection.
+?
+functional_description
+string
+A functional description of the collection describing how inputs affect the output.
+?
+is_all_yes
+boolean
+Whether the collection requires that only the market side of 'yes' may be used.
+?
+is_ordered
+boolean
+Whether the collection is ordered. If true, the order of markets passed into Lookup/Create affects the output. If false, the order does not matter.
+?
+is_single_market_per_event
+boolean
+Whether the collection accepts multiple markets from the same event passed into Lookup/Create.
+?
+open_date
+string<date-time>
+The open date of the collection. Before this time, the collection cannot be interacted with.
+?
+series_ticker
+string
+Series associated with the collection. Events produced in the collection will be associated with this series.
+?
+size_max
+integer
+The maximum number of markets that must be passed into Lookup/Create (inclusive).
+?
+size_min
+integer
+The minimum number of markets that must be passed into Lookup/Create (inclusive).
+?
+title
+string
+Title of the collection.
+Get Milestone
+Get Multivariate Event Collection
+Powered by Mintlify
+Get Multivariate Event Collections - API Documentation
+
+collection
+Get Multivariate Event Collection
+Endpoint for getting data about a multivariate event collection by its ticker.
+GET
+/
+multivariate_event_collections
+/
+{collection_ticker}
+Try it
+Path Parameters
+?
+collection_ticker
+stringrequired
+Collection ticker
+Response
+200 - application/json
+?
+multivariate_contract
+object
+The multivariate event collection.
+Hide child attributes
+?
+multivariate_contract.associated_event_tickers
+string[]
+A list of events associated with the collection. Markets in these events can be passed as inputs to the Lookup and Create endpoints.
+?
+multivariate_contract.close_date
+string<date-time>
+The close date of the collection. After this time, the collection cannot be interacted with.
+?
+multivariate_contract.collection_ticker
+string
+Unique identifier for the collection.
+?
+multivariate_contract.description
+string
+Short description of the collection.
+?
+multivariate_contract.functional_description
+string
+A functional description of the collection describing how inputs affect the output.
+?
+multivariate_contract.is_all_yes
+boolean
+Whether the collection requires that only the market side of 'yes' may be used.
+?
+multivariate_contract.is_ordered
+boolean
+Whether the collection is ordered. If true, the order of markets passed into Lookup/Create affects the output. If false, the order does not matter.
+?
+multivariate_contract.is_single_market_per_event
+boolean
+Whether the collection accepts multiple markets from the same event passed into Lookup/Create.
+?
+multivariate_contract.open_date
+string<date-time>
+The open date of the collection. Before this time, the collection cannot be interacted with.
+?
+multivariate_contract.series_ticker
+string
+Series associated with the collection. Events produced in the collection will be associated with this series.
+?
+multivariate_contract.size_max
+integer
+The maximum number of markets that must be passed into Lookup/Create (inclusive).
+?
+multivariate_contract.size_min
+integer
+The minimum number of markets that must be passed into Lookup/Create (inclusive).
+?
+multivariate_contract.title
+string
+Title of the collection.
+Get Multivariate Event Collections
+Create Market In Multivariate Event Collection
+Powered by Mintlify
+Get Multivariate Event Collection - API Documentation
+collection
+Create Market In Multivariate Event Collection
+Endpoint for looking up an individual market in a multivariate event collection. This endpoint must be hit at least once before trading or looking up a market.
+POST
+/
+multivariate_event_collections
+/
+{collection_ticker}
+Try it
+Path Parameters
+?
+collection_ticker
+stringrequired
+Collection ticker
+Body
+application/json
+?
+selected_markets
+object[]
+List of selected markets that act as parameters to determine which market is created.
+Hide child attributes
+?
+event_ticker
+string
+Event ticker identifier.
+?
+market_ticker
+string
+Market ticker identifier.
+?
+side
+enum<string>
+Side of the market (yes or no).
+Available options: yes, no
+Response
+200 - application/json
+?
+event_ticker
+string
+Event ticker for the created market.
+?
+market_ticker
+string
+Market ticker for the created market.
+
+collection
+Get Multivariate Event Collection Lookup History
+Endpoint for retrieving which markets in an event collection were recently looked up.
+GET
+/
+multivariate_event_collections
+/
+{collection_ticker}
+/
+lookup
+Try it
+Path Parameters
+?
+collection_ticker
+stringrequired
+Collection ticker
+Response
+200 - application/json
+?
+lookup_points
+object[]
+List of recent lookup points in the collection.
+Hide child attributes
+?
+event_ticker
+string
+Event ticker for the lookup point.
+?
+last_queried_ts
+string<date-time>
+Timestamp when this lookup was last queried.
+?
+market_ticker
+string
+Market ticker for the lookup point.
+?
+selected_markets
+object[]
+Markets that were selected for this lookup.
+Hide child attributes
+?
+event_ticker
+string
+Event ticker identifier.
+?
+market_ticker
+string
+Market ticker identifier.
+?
+side
+enum<string>
+Side of the market (yes or no).
+Available options: yes, no
+Create Market In Multivariate Event Collection
+Lookup Tickers For Market In Multivariate Event Collection
+Powered by Mintlify
+Get Multivariate Event Collection Lookup History - API Documentation
+
+collection
+Lookup Tickers For Market In Multivariate Event Collection
+Endpoint for looking up an individual market in a multivariate event collection. If CreateMarketInMultivariateEventCollection has never been hit with that variable combination before, this will return a 404.
+PUT
+/
+multivariate_event_collections
+/
+{collection_ticker}
+/
+lookup
+Try it
+Path Parameters
+?
+collection_ticker
+stringrequired
+Collection ticker
+Body
+application/json
+?
+selected_markets
+object[]
+List of selected markets that act as parameters to determine which market is produced.
+Hide child attributes
+?
+event_ticker
+string
+Event ticker identifier.
+?
+market_ticker
+string
+Market ticker identifier.
+?
+side
+enum<string>
+Side of the market (yes or no).
+Available options: yes, no
+Response
+200 - application/json
+?
+event_ticker
+string
+Event ticker for the looked up market.
+?
+market_ticker
+string
+
+portfolio
+Get Balance
+Endpoint for getting the balance of a member. The balance value is returned in cents.
+
+GET
+/
+portfolio
+/
+balance
+
+Try it
+Response
+200 - application/json
+​
+balance
+integer
+Member's available balance in cents. This represents the amount available for trading.
+
+
+portfolio
+Get Fills
+Endpoint for getting all fills for the member. A fill is when a trade you have is matched.
+
+GET
+/
+portfolio
+/
+fills
+
+Try it
+Query Parameters
+​
+ticker
+string
+Restricts the response to trades in a specific market.
+
+​
+order_id
+string
+Restricts the response to trades related to a specific order.
+
+​
+min_ts
+integer
+Restricts the response to trades after a timestamp.
+
+​
+max_ts
+integer
+Restricts the response to trades before a timestamp.
+
+​
+limit
+integer
+Parameter to specify the number of results per page. Defaults to 100.
+
+​
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned from the previous response to get the next page.
+
+​
+use_dollars
+boolean
+Whether to return prices in centi-cent format (0.0001) instead of cent format (0.01).
+
+Response
+200 - application/json
+​
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned here in the cursor query parameter for this end-point to get the next page containing limit records. An empty value of this field indicates there is no next page.
+
+​
+fills
+object[]
+List of fills for the member.
+
+portfolio
+Get Order Groups
+Retrieves all order groups for the authenticated user.
+
+GET
+/
+portfolio
+/
+order_groups
+
+Try it
+Response
+200 - application/json
+​
+order_groups
+object[]
+List of order groups for the member.
+
+Hide child attributes
+
+​
+id
+string
+Unique identifier for the order group.
+
+​
+is_auto_cancel_enabled
+boolean
+Whether auto-cancel is enabled for this order group.
+
+portfolio
+Get Orders
+Endpoint for getting all orders for the member.
+
+GET
+/
+portfolio
+/
+orders
+
+Try it
+Query Parameters
+​
+ticker
+string
+Restricts the response to orders in a single market.
+
+​
+event_ticker
+string
+Restricts the response to orders in a single event.
+
+​
+min_ts
+integer
+Restricts the response to orders after a timestamp, formatted as a Unix Timestamp.
+
+​
+max_ts
+integer
+Restricts the response to orders before a timestamp, formatted as a Unix Timestamp.
+
+​
+status
+string
+Restricts the response to orders that have a certain status: resting, canceled, or executed.
+
+​
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned from the previous response to get the next page.
+
+​
+limit
+integer
+Parameter to specify the number of results per page. Defaults to 100.
+
+Response
+200 - application/json
+​
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned here in the cursor query parameter for this end-point to get the next page containing limit records. An empty value of this field indicates there is no next page.
+
+​
+orders
+object[]
+List of orders for the member.
+
+portfolio
+Get Queue Positions for Orders
+Endpoint for getting queue positions for all resting orders. Queue position represents the number of contracts that need to be matched before an order receives a partial or full match, determined using price-time priority.
+
+GET
+/
+portfolio
+/
+orders
+/
+queue_positions
+
+Try it
+Query Parameters
+​
+market_tickers
+string
+Comma-separated list of market tickers to filter by
+
+​
+event_ticker
+string
+Event ticker to filter by
+
+Response
+200 - application/json
+​
+queue_positions
+object[]
+Hide child attributes
+
+​
+market_ticker
+string
+​
+order_id
+string
+​
+queue_position
+integer
+
+portfolio
+Get Order
+Endpoint for getting a single order.
+
+GET
+/
+portfolio
+/
+orders
+/
+{order_id}
+
+Try it
+Path Parameters
+​
+order_id
+stringrequired
+Order ID
+
+Response
+200 - application/json
+​
+order
+object
+Order for the member.
+
+Hide child attributes
+
+​
+order.action
+string
+Representing trade action; currently supports buy and sell.
+
+​
+order.client_order_id
+string
+Optional unique identifier for order placement.
+
+​
+order.created_time
+any
+Time of creation for the order.
+
+​
+order.expiration_time
+any
+Time of expiration for this order.
+
+​
+order.fill_count
+integer
+The size of filled orders (maker + taker).
+
+​
+order.initial_count
+integer
+The initial size of the order (contract units).
+
+​
+order.last_update_time
+any
+The last update to an order (modify, cancel, fill).
+
+​
+order.maker_fees
+integer
+Fees paid on filled maker contracts, in cents.
+
+​
+order.maker_fill_cost
+integer
+The cost of filled maker orders in cents.
+
+​
+order.no_price
+integer
+Submitting price of the No side of the trade, in cents. Exactly one of yes_price and no_price must be passed.
+
+​
+order.no_price_dollars
+integer[]
+The no price for this order in fixed-point dollars.
+
+​
+order.order_group_id
+string
+​
+order.order_id
+string
+Unique identifier for orders.
+
+​
+order.queue_position
+integer
+Position in the priority queue at a given price level.
+
+​
+order.remaining_count
+integer
+The size of the remaining resting orders (contract units).
+
+​
+order.self_trade_prevention_type
+string
+​
+order.side
+string
+Representing direction of the order; currently supports yes and no.
+
+​
+order.status
+string
+The current status of this order.
+
+​
+order.taker_fees
+integer
+Fees paid on filled taker contracts, in cents.
+
+​
+order.taker_fill_cost
+integer
+The cost of filled taker orders in cents.
+
+​
+order.ticker
+string
+Unique identifier for markets.
+
+​
+order.type
+string
+Representing order type; currently supports 'market' and 'limit'.
+
+​
+order.user_id
+string
+Unique identifier for users.
+
+​
+order.yes_price
+integer
+The yes price for this order in cents.
+
+​
+order.yes_price_dollars
+integer[]
+
+portfolio
+Get Positions
+Endpoint for getting all market positions for the member.
+
+GET
+/
+portfolio
+/
+positions
+
+Try it
+Query Parameters
+​
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned from the previous response to get the next page.
+
+​
+limit
+integer
+Parameter to specify the number of results per page. Defaults to 100.
+
+​
+count_filter
+string
+Restricts the positions to those with any of following fields with non-zero values, as a comma separated list. The following values are accepted: position, total_traded, resting_order_count
+
+​
+settlement_status
+string
+Settlement status of the markets to return. Defaults to unsettled.
+
+​
+ticker
+string
+Ticker of desired positions.
+
+​
+event_ticker
+string
+Event ticker of desired positions.
+
+Response
+200 - application/json
+​
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned here in the cursor query parameter for this end-point to get the next page containing limit records. An empty value of this field indicates there is no next page.
+
+​
+event_positions
+object[]
+List of event positions.
+
+Show child attributes
+
+​
+market_positions
+object[]
+List of market positions.
+
+portfolio
+Get Settlements
+Endpoint for getting the member’s settlements historical track.
+
+GET
+/
+portfolio
+/
+settlements
+
+Try it
+Query Parameters
+​
+limit
+integer
+Parameter to specify the number of results per page. Defaults to 100.
+
+​
+ticker
+string
+Restricts the response to settlements in a specific market.
+
+​
+event_ticker
+string
+Restricts the response to settlements in a single event.
+
+​
+min_ts
+integer
+Restricts the response to settlements after a timestamp.
+
+​
+max_ts
+integer
+Restricts the response to settlements before a timestamp.
+
+​
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned from the previous response to get the next page.
+
+Response
+200 - application/json
+​
+cursor
+string
+The Cursor represents a pointer to the next page of records in the pagination. Use the value returned here in the cursor query parameter for this end-point to get the next page containing limit records. An empty value of this field indicates there is no next page.
+
+​
+settlements
+object[]
+Settlement summaries for all markets the user participated in.
+
+portfolio
+Get Portfolio Resting Order Total Value
+Endpoint for getting the total value, in cents, of resting orders. This endpoint is only intended for use by FCM members (rare). Note: If you’re uncertain about this endpoint, it likely does not apply to you.
+
+GET
+/
+portfolio
+/
+summary
+/
+total_resting_order_value
+
+Try it
+Response
+200 - application/json
+​
+total_value
+integer
+Total value of resting orders in cents.
+
+Websockets
+Market Positions
+Real-time updates of your positions in markets. Requires authentication.
+
+Requirements:
+
+Authentication required
+Market specification optional (omit to receive all positions)
+Updates sent when your position changes due to trades, settlements, etc.
+Monetary Values: All monetary values (position_cost, realized_pnl, fees_paid) are returned in centi-cents (1/10,000th of a dollar). To convert to dollars, divide by 10,000.
+
+Use case: Portfolio tracking, position monitoring, P&L calculations
+
+WSS
+wss://api.elections.kalshi.com
+market_positions
+
+Security Schemes
+apiKey
+type:
+apiKey
+API key authentication required for WebSocket connections.
+The API key should be provided during the WebSocket handshake.
+
+
+Receive
+Market Position Update
+type:
+object
+
+show 3 properties
+Real-time position updates for authenticated user
+
+type
+type:
+string
+required
+market_position
+
+sid
+type:
+integer
+required
+Server-generated subscription identifier (sid) used to identify the channel
+
+msg
+type:
+object
+required
+
+show 7 properties
+user_id
+type:
+string
+User ID for the position
+
+market_ticker
+type:
+string
+Unique market identifier
+
+position
+type:
+integer
+Current net position (positive for long, negative for short)
+
+position_cost
+type:
+integer
+Current cost basis of the position in centi-cents (1/10,000th of a dollar)
+
+realized_pnl
+type:
+integer
+Realized profit/loss in centi-cents (1/10,000th of a dollar)
+
+fees_paid
+type:
+integer
+Total fees paid in centi-cents (1/10,000th of a dollar)
+
+volume
+type:
+integer
+Total volume traded
+
+Websockets
+User Fills
+Your order fill notifications. Requires authentication.
+
+Requirements:
+
+Authentication required
+Market specification ignored (always sends all your fills)
+Updates sent immediately when your orders are filled
+Use case: Tracking your trading activity
+
+WSS
+wss://api.elections.kalshi.com
+fill
+
+Security Schemes
+apiKey
+type:
+apiKey
+API key authentication required for WebSocket connections.
+The API key should be provided during the WebSocket handshake.
+
+
+Receive
+Fill Update
+type:
+object
+
+show 3 properties
+Private fill information for authenticated user
+
+type
+type:
+string
+required
+fill
+
+sid
+type:
+integer
+required
+Server-generated subscription identifier (sid) used to identify the channel
+
+msg
+type:
+object
+required
+
+show 12 properties
+trade_id
+type:
+string
+Unique identifier for fills. This is what you use to differentiate fills
+
+order_id
+type:
+string
+Unique identifier for orders. This is what you use to differentiate fills for different orders
+
+market_ticker
+type:
+string
+Unique market identifier
+
+is_taker
+type:
+boolean
+If you were a taker on this fill
+
+side
+type:
+string
+Market side
+
+yes_price
+type:
+integer
+Price for the yes side of the fill. Between 1 and 99 (inclusive)
+
+no_price
+type:
+integer
+Price for the no side of the fill. Between 1 and 99 (inclusive)
+
+count
+type:
+integer
+Number of contracts filled
+
+action
+type:
+string
+Order action type
+
+ts
+type:
+integer
+Unix timestamp for when the update happened (in seconds)
+
+client_order_id
+type:
+string
+Optional client-provided order ID
+
+post_position
+type:
+integer
+Position after the fill
+
+Quick Start: WebSockets
+Learn how to establish and maintain a WebSocket connection to stream real-time market data
+
+​
+Overview
+Kalshi’s WebSocket API provides real-time updates for:
+Order book changes
+Trade executions
+Market status updates
+Fill notifications (authenticated connections only)
+​
+Connection URL
+Connect to the WebSocket endpoint at:
+
+Copy
+
+Ask AI
+wss://api.elections.kalshi.com/trade-api/ws/v2
+For the demo environment, use:
+
+Copy
+
+Ask AI
+wss://demo-api.kalshi.co/trade-api/ws/v2
+​
+Authentication
+WebSocket connections require authentication using the same API key signing mechanism as REST endpoints.
+For detailed information about API key generation and request signing, see our API Keys documentation.
+​
+Required Headers
+When establishing the WebSocket connection, include these headers:
+
+Copy
+
+Ask AI
+KALSHI-ACCESS-KEY: your_api_key_id
+KALSHI-ACCESS-SIGNATURE: request_signature
+KALSHI-ACCESS-TIMESTAMP: unix_timestamp_in_seconds
+​
+Signing the WebSocket Request
+The signature for WebSocket connections follows the same pattern as REST API requests:
+Create the message to sign:
+
+Copy
+
+Ask AI
+timestamp + "GET" + "/trade-api/ws/v2"
+Generate the signature using your private key (see API Keys documentation)
+Include the headers when opening the WebSocket connection
+​
+Establishing a Connection
+To connect to the WebSocket API, you need to:
+Generate authentication headers (same as REST API)
+Create a WebSocket connection with those headers
+Handle the connection lifecycle
+Here’s how to establish an authenticated connection:
+
+Copy
+
+Ask AI
+import websockets
+import asyncio
+
+# WebSocket URL
+ws_url = "wss://demo-api.kalshi.co/trade-api/ws/v2"  # Demo environment
+
+# Generate authentication headers (see API Keys documentation)
+auth_headers = {
+    "KALSHI-ACCESS-KEY": "your_api_key_id",
+    "KALSHI-ACCESS-SIGNATURE": "generated_signature",
+    "KALSHI-ACCESS-TIMESTAMP": "timestamp_in_milliseconds"
+}
+
+# Connect with authentication
+async def connect():
+    async with websockets.connect(ws_url, additional_headers=auth_headers) as websocket:
+        print("Connected to Kalshi WebSocket")
+        
+        # Connection is now established
+        # You can start sending and receiving messages
+        
+        # Listen for messages
+        async for message in websocket:
+            print(f"Received: {message}")
+
+# Run the connection
+asyncio.run(connect())
+​
+Subscribing to Data
+Once connected, subscribe to channels by sending a subscription command:
+
+Copy
+
+Ask AI
+import json
+
+async def subscribe_to_ticker(websocket):
+    """Subscribe to ticker updates"""
+    subscription = {
+        "id": 1,
+        "cmd": "subscribe",
+        "params": {
+            "channels": ["ticker"]
+        }
+    }
+    await websocket.send(json.dumps(subscription))
+
+async def subscribe_to_orderbook(websocket, market_tickers):
+    """Subscribe to orderbook updates for specific markets"""
+    subscription = {
+        "id": 2,
+        "cmd": "subscribe", 
+        "params": {
+            "channels": ["orderbook"],
+            "market_tickers": market_tickers
+        }
+    }
+    await websocket.send(json.dumps(subscription))
+​
+Processing Messages
+Handle incoming messages based on their type:
+
+Copy
+
+Ask AI
+async def process_message(message):
+    """Process incoming WebSocket messages"""
+    data = json.loads(message)
+    msg_type = data.get("type")
+    
+    if msg_type == "ticker":
+        # Handle ticker update
+        market = data["data"]["market_ticker"]
+        bid = data["data"]["bid"]
+        ask = data["data"]["ask"]
+        print(f"{market}: Bid ${bid}, Ask ${ask}")
+        
+    elif msg_type == "orderbook_snapshot":
+        # Handle full orderbook state
+        print(f"Orderbook snapshot for {data['data']['market_ticker']}")
+        
+    elif msg_type == "orderbook_update":
+        # Handle orderbook changes
+        print(f"Orderbook update for {data['data']['market_ticker']}")
+        # Note: client_order_id field is optional - present only when you caused this change
+        if 'client_order_id' in data['data']:
+            print(f"  Your order {data['data']['client_order_id']} caused this change")
+        
+    elif msg_type == "error":
+        print(f"Error: {data.get('message')}")
+​
+Connection Keep-Alive
+The Python websockets library automatically handles WebSocket ping/pong frames to keep connections alive. No manual heartbeat handling is required. Learn more about automatic keepalive in the websockets documentation.
+Other WebSocket libraries may require manual ping/pong implementation.
+​
+Subscribing to Channels
+Once connected, subscribe to specific data channels:
+​
+Subscribe to Ticker Updates
+To receive real-time ticker updates for all markets:
+
+Copy
+
+Ask AI
+async def subscribe_to_tickers(self):
+    """Subscribe to ticker updates for all markets"""
+    subscription_message = {
+        "id": self.message_id,
+        "cmd": "subscribe",
+        "params": {
+            "channels": ["ticker"]
+        }
+    }
+    await self.ws.send(json.dumps(subscription_message))
+    self.message_id += 1
+​
+Subscribe to Specific Markets
+To subscribe to orderbook or trade updates for specific markets:
+
+Copy
+
+Ask AI
+async def subscribe_to_markets(self, channels, market_tickers):
+    """Subscribe to specific channels and markets"""
+    subscription_message = {
+        "id": self.message_id,
+        "cmd": "subscribe",
+        "params": {
+            "channels": channels,
+            "market_tickers": market_tickers
+        }
+    }
+    await self.ws.send(json.dumps(subscription_message))
+    self.message_id += 1
+
+# Example usage:
+# Subscribe to orderbook updates
+await subscribe_to_markets(["orderbook"], ["KXFUT24-LSV", "KXHARRIS24-LSV"])
+
+# Subscribe to trade feed
+await subscribe_to_markets(["trades"], ["KXFUT24-LSV"])
+​
+Connection Lifecycle
+Initial Connection: Establish WebSocket with authentication headers
+Subscribe: Send subscription commands for desired channels
+Receive Updates: Process incoming messages based on their type
+Handle Disconnects: Implement reconnection logic with exponential backoff
+​
+Error Handling
+The server may send error messages in this format:
+
+Copy
+
+Ask AI
+{
+  "type": "error",
+  "data": {
+    "code": "error_code",
+    "message": "Human-readable error message"
+  }
+}
+Common error codes:
+invalid_auth: Authentication failed
+invalid_market: Market ticker not found
+rate_limit: Too many requests
+invalid_action: Unknown command
+​
+Best Practices
+Connection Management
+Implement automatic reconnection with exponential backoff
+Handle network interruptions gracefully
+Use the websockets library’s built-in keepalive
+Data Handling
+Process messages asynchronously to avoid blocking
+Implement proper error handling for malformed messages
+Cache initial orderbook state before applying updates
+Security
+Never expose your private key in client-side code
+Rotate API keys regularly
+Use secure key storage practices
+Performance
+Subscribe only to markets you need
+Implement message buffering for high-frequency updates
+Consider using connection pooling for multiple subscriptions
+​
+Complete Example
+Here’s a complete, runnable example that connects to the WebSocket API and subscribes to orderbook updates:
+
+Copy
+
+Ask AI
+import asyncio
+import base64
+import json
+import time
+import websockets
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+
+# Configuration
+KEY_ID = "your_api_key_id"
+PRIVATE_KEY_PATH = "path/to/private_key.pem"
+MARKET_TICKER = "KXHARRIS24-LSV"  # Replace with any open market
+WS_URL = "wss://demo-api.kalshi.co/trade-api/ws/v2"
+
+def sign_pss_text(private_key, text: str) -> str:
+    """Sign message using RSA-PSS"""
+    message = text.encode('utf-8')
+    signature = private_key.sign(
+        message,
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.DIGEST_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    return base64.b64encode(signature).decode('utf-8')
+
+def create_headers(private_key, method: str, path: str) -> dict:
+    """Create authentication headers"""
+    timestamp = str(int(time.time() * 1000))
+    msg_string = timestamp + method + path.split('?')[0]
+    signature = sign_pss_text(private_key, msg_string)
+    
+    return {
+        "Content-Type": "application/json",
+        "KALSHI-ACCESS-KEY": KEY_ID,
+        "KALSHI-ACCESS-SIGNATURE": signature,
+        "KALSHI-ACCESS-TIMESTAMP": timestamp,
+    }
+
+async def orderbook_websocket():
+    """Connect to WebSocket and subscribe to orderbook"""
+    # Load private key
+    with open(PRIVATE_KEY_PATH, 'rb') as f:
+        private_key = serialization.load_pem_private_key(
+            f.read(),
+            password=None
+        )
+    
+    # Create WebSocket headers
+    ws_headers = create_headers(private_key, "GET", "/trade-api/ws/v2")
+    
+    async with websockets.connect(WS_URL, additional_headers=ws_headers) as websocket:
+        print(f"Connected! Subscribing to orderbook for {MARKET_TICKER}")
+        
+        # Subscribe to orderbook
+        subscribe_msg = {
+            "id": 1,
+            "cmd": "subscribe",
+            "params": {
+                "channels": ["orderbook_delta"],
+                "market_ticker": MARKET_TICKER
+            }
+        }
+        await websocket.send(json.dumps(subscribe_msg))
+        
+        # Process messages
+        async for message in websocket:
+            data = json.loads(message)
+            msg_type = data.get("type")
+            
+            if msg_type == "subscribed":
+                print(f"Subscribed: {data}")
+                
+            elif msg_type == "orderbook_snapshot":
+                print(f"Orderbook snapshot: {data}")
+                
+            elif msg_type == "orderbook_delta":
+                # The client_order_id field is optional - only present when you caused the change
+                if 'client_order_id' in data.get('data', {}):
+                    print(f"Orderbook update (your order {data['data']['client_order_id']}): {data}")
+                else:
+                    print(f"Orderbook update: {data}")
+                        
+            elif msg_type == "error":
+                print(f"Error: {data}")
+
+# Run the example
+if __name__ == "__main__":
+    asyncio.run(orderbook_websocket())
+This example:
+Establishes an authenticated WebSocket connection
+Subscribes to orderbook updates for the specified market
+Processes both the initial snapshot and incremental updates
+Displays orderbook changes in real-time
+To run this example:
+Replace KEY_ID with your API key ID
+Replace PRIVATE_KEY_PATH with the path to your private key file
+Replace MARKET_TICKER with any open market ticker
+Run with Python 3.7+
+​
+Next Steps
+Review the WebSocket API Reference for detailed message specifications
+Explore Market Data Quick Start for REST API integration
+Check out our Demo Environment for testing
