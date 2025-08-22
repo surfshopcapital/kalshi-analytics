@@ -99,41 +99,22 @@ def write_series_volumes() -> pd.DataFrame:
 
 
 def tickers_with_min_volume(min_volume: int, days: int, granularity: str) -> list:
-    """Get tickers that have minimum volume over the specified period"""
+    """Get tickers that have existing candle data with minimum volume"""
     try:
-        # Check if candles directory exists and has files
-        candles_dir = os.path.join("data", "candles")
-        if not os.path.exists(candles_dir):
-            os.makedirs(candles_dir, exist_ok=True)
-            print(f"📁 Created candles directory: {candles_dir}")
+        # Use os.listdir instead of DuckDB read_dir for better compatibility
+        if not os.path.exists(CANDLES_DIR):
             return []
-        
-        # Check if there are any candle files
-        candle_files = [f for f in os.listdir(candles_dir) if f.endswith(f'_{granularity}.parquet')]
-        if not candle_files:
-            print(f"📊 No {granularity} candle files found yet. Will create them during refresh.")
-            return []
-        
-        # If we have files, proceed with the query - FIXED SYNTAX
-        q = f"""
-            SELECT DISTINCT 
-                REPLACE(filename, 'candles_', '') as ticker
-            FROM read_dir('{candles_dir}')
-            WHERE filename LIKE 'candles_%_{granularity}.parquet'
-        """
-        
-        df = duckdb.query(q).to_df()
-        if df.empty:
-            print(f"📊 No tickers found in {granularity} candle files")
-            return []
+            
+        # Get all parquet files in the candles directory
+        candle_files = [f for f in os.listdir(CANDLES_DIR) 
+                       if f.startswith('candles_') and f.endswith(f'_{granularity}.parquet')]
         
         # Extract ticker names from filenames
         tickers = []
-        for filename in df.iloc[:, 0]:  # First column contains filenames
-            # Extract ticker from filename like "candles_TICKER_1h.parquet"
-            if filename.startswith('candles_') and filename.endswith(f'_{granularity}.parquet'):
-                ticker = filename[8:-len(f'_{granularity}.parquet')-1]  # Remove "candles_" prefix and "_1h.parquet" suffix
-                tickers.append(ticker)
+        for filename in candle_files:
+            # Remove 'candles_' prefix and '_{granularity}.parquet' suffix
+            ticker = filename.replace('candles_', '').replace(f'_{granularity}.parquet', '')
+            tickers.append(ticker)
         
         print(f"�� Found {len(tickers)} tickers with existing {granularity} candle data")
         return tickers
