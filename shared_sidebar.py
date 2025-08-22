@@ -1,13 +1,15 @@
 # shared_sidebar.py
 
 import streamlit as st
-from utils import get_data_source_status
 
 def render_shared_sidebar():
     """
     Render a shared sidebar component that appears on all pages.
     This maintains the data source selection across page navigation.
     """
+    
+    # Import here to avoid circular imports
+    from utils import get_data_source_status
     
     # ── Data Source Selection ─────────────────────────────────────────────
     st.sidebar.markdown("## 📊 Data Source")
