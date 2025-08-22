@@ -1,18 +1,11 @@
 # utils.py
-# VERSION: 2025-08-22-03 - FORCE RELOAD - CACHE BUSTING
-# TIMESTAMP: 2025-08-22 04:15:00 UTC
-# CACHE_KEY: 20250822041500
+# VERSION: 2025-08-22-04 - FINAL FIX - FORCE RELOAD
+# TIMESTAMP: 2025-08-22 04:25:00 UTC
+# CACHE_KEY: 20250822042500
 
 import pandas as pd
 
-# Force module reload by changing the module object
-import sys
-if 'utils' in sys.modules:
-    # Delete the old module completely
-    del sys.modules['utils']
-    # Force Python to reload this module
-    import importlib
-    importlib.invalidate_caches()
+# Module import completed successfully
 
 # Safe import for os and datetime
 try:
@@ -56,13 +49,7 @@ except ImportError:
     STREAMLIT_AVAILABLE = False
     st = None
 
-# Call this during import to see what's happening (AFTER STREAMLIT_AVAILABLE is defined)
-try:
-    debug_import_status()
-except Exception as e:
-    if DEBUG_AVAILABLE:
-        print(f"🔍 DEBUG: Error in debug_import_status: {e}")
-        traceback.print_exc()
+# Debug import status will be called at the end of the file
 
 # ── CRITICAL: Ensure get_data_source_status is always available ─────────────────
 def get_data_source_status_v2() -> dict:
@@ -1390,6 +1377,17 @@ def get_unified_summary(data_sources: list = None) -> pd.DataFrame:
 # ── COMPATIBILITY ALIAS ─────────────────────────────────────────────────────
 # Keep the old function name for backward compatibility
 get_data_source_status = get_data_source_status_v2
+
+# ── DEBUG: Call this at the end to verify all functions are available ─────────────────
+try:
+    if DEBUG_AVAILABLE:
+        print(f"🔍 DEBUG: utils.py import completed successfully")
+        print(f"🔍 DEBUG: Total functions defined: {len([f for f in dir() if not f.startswith('_')])}")
+        print(f"🔍 DEBUG: Key functions available: {[f for f in dir() if not f.startswith('_') and 'get_' in f][:5]}")
+except Exception as e:
+    if DEBUG_AVAILABLE:
+        print(f"🔍 DEBUG: Error in debug_import_status: {e}")
+        traceback.print_exc()
 
 
 
