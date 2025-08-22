@@ -29,6 +29,10 @@ os.makedirs(CANDLES_DIR, exist_ok=True)
 # after you define DATA_DIR, summarize PQ and before other functions
 SERIES_VOLUMES_PQ = os.path.join(DATA_DIR, "series_volumes.parquet")
 
+# NEW: Polymarket data files
+POLYMARKET_MARKETS_PQ = os.path.join(DATA_DIR, "polymarket_markets.parquet")
+POLYMARKET_SUMMARY_PQ = os.path.join(DATA_DIR, "polymarket_summary.parquet")
+
 """
 Configuration loading with collision-safe import.
 Avoids conflicts with unrelated third-party 'config' modules by loading from the
@@ -566,8 +570,22 @@ def get_summary_df(api_key: str, page_size: int = 1000) -> pd.DataFrame:
 
 def get_volume_columns(df: pd.DataFrame) -> tuple:
     """Returns (volume_24h_series, total_volume_series) consistently across all pages"""
-    vol_24h = df.get("volume_24h", df.get("volume"))
-    total_vol = df.get("volume")
+    # Handle different data source structures
+    if 'data_source' in df.columns:
+        # Unified data - handle both Kalshi and Polymarket
+        vol_24h = df.get("volume_24h", df.get("volume"))
+        total_vol = df.get("volume_total", df.get("volume"))
+    else:
+        # Legacy Kalshi data
+        vol_24h = df.get("volume_24h", df.get("volume"))
+        total_vol = df.get("volume")
+    
+    # Ensure we never return None - provide fallbacks
+    if vol_24h is None or vol_24h.empty:
+        vol_24h = pd.Series(0, index=df.index)
+    if total_vol is None or total_vol.empty:
+        total_vol = pd.Series(0, index=df.index)
+    
     return vol_24h, total_vol
 
 def compute_stats(df: pd.DataFrame) -> dict:
@@ -943,3 +961,179 @@ def make_title_clickable(title: str, ticker: str = None, key: str = None) -> boo
         return True
     
     return False
+
+# ── NEW: Unified Data Access Functions ─────────────────────────────────────
+
+def get_unified_markets(data_sources: list = None) -> pd.DataFrame:
+    """
+    Get markets from multiple data sources in a unified format.
+    
+    Args:
+        data_sources: List of data sources to include. Options: ['kalshi', 'polymarket']
+                     If None, returns all available sources.
+    
+    Returns:
+        DataFrame with markets from all specified sources
+    """
+    if data_sources is None:
+        data_sources = ['kalshi', 'polymarket']
+    
+    all_markets = []
+    
+    # Load Kalshi markets
+    if 'kalshi' in data_sources and os.path.exists(ACTIVE_MARKETS_PQ):
+        try:
+            kalshi_df = pd.read_parquet(ACTIVE_MARKETS_PQ)
+            # Add source identifier
+            kalshi_df['data_source'] = 'kalshi'
+            kalshi_df['source_id'] = kalshi_df.get('ticker', '')
+            all_markets.append(kalshi_df)
+            print(f"📊 Loaded {len(kalshi_df)} Kalshi markets")
+        except Exception as e:
+            print(f"⚠️ Error loading Kalshi markets: {e}")
+    
+    # Load Polymarket markets
+    if 'polymarket' in data_sources and os.path.exists(POLYMARKET_MARKETS_PQ):
+        try:
+            polymarket_df = pd.read_parquet(POLYMARKET_MARKETS_PQ)
+            # Polymarket data already has data_source field
+            all_markets.append(polymarket_df)
+            print(f"📊 Loaded {len(polymarket_df)} Polymarket markets")
+        except Exception as e:
+            print(f"⚠️ Error loading Polymarket markets: {e}")
+    
+    if not all_markets:
+        print("❌ No markets loaded from any source")
+        return pd.DataFrame()
+    
+    # Combine all markets
+    combined_df = pd.concat(all_markets, ignore_index=True)
+    print(f"✅ Combined {len(combined_df)} total markets")
+    
+    return combined_df
+
+def get_markets_by_source(data_source: str) -> pd.DataFrame:
+    """
+    Get markets from a specific data source.
+    
+    Args:
+        data_source: 'kalshi' or 'polymarket'
+    
+    Returns:
+        DataFrame with markets from the specified source
+    """
+    if data_source == 'kalshi':
+        if os.path.exists(ACTIVE_MARKETS_PQ):
+            df = pd.read_parquet(ACTIVE_MARKETS_PQ)
+            df['data_source'] = 'kalshi'
+            df['source_id'] = df.get('ticker', '')
+            return df
+        else:
+            return pd.DataFrame()
+    
+    elif data_source == 'polymarket':
+        if os.path.exists(POLYMARKET_MARKETS_PQ):
+            return pd.read_parquet(POLYMARKET_MARKETS_PQ)
+        else:
+            return pd.DataFrame()
+    
+    else:
+        print(f"❌ Unknown data source: {data_source}")
+        return pd.DataFrame()
+
+def get_unified_summary(data_sources: list = None) -> pd.DataFrame:
+    """
+    Get market summaries from multiple data sources.
+    
+    Args:
+        data_sources: List of data sources to include
+    
+    Returns:
+        DataFrame with market summaries from all specified sources
+    """
+    if data_sources is None:
+        data_sources = ['kalshi', 'polymarket']
+    
+    all_summaries = []
+    
+    # Load Kalshi summary
+    if 'kalshi' in data_sources and os.path.exists(SUMMARY_MARKETS_PQ):
+        try:
+            kalshi_summary = pd.read_parquet(SUMMARY_MARKETS_PQ)
+            kalshi_summary['data_source'] = 'kalshi'
+            all_summaries.append(kalshi_summary)
+        except Exception as e:
+            print(f"⚠️ Error loading Kalshi summary: {e}")
+    
+    # Load Polymarket summary
+    if 'polymarket' in data_sources and os.path.exists(POLYMARKET_SUMMARY_PQ):
+        try:
+            polymarket_summary = pd.read_parquet(POLYMARKET_SUMMARY_PQ)
+            polymarket_summary['data_source'] = 'polymarket'
+            all_summaries.append(polymarket_summary)
+        except Exception as e:
+            print(f"⚠️ Error loading Polymarket summary: {e}")
+    
+    if not all_summaries:
+        return pd.DataFrame()
+    
+    # Combine summaries
+    combined_summary = pd.concat(all_summaries, ignore_index=True)
+    return combined_summary
+
+def get_data_source_status() -> dict:
+    """
+    Get status of all data sources.
+    
+    Returns:
+        Dictionary with status information for each data source
+    """
+    status = {}
+    
+    # Kalshi status
+    kalshi_markets_exist = os.path.exists(ACTIVE_MARKETS_PQ)
+    kalshi_summary_exist = os.path.exists(SUMMARY_MARKETS_PQ)
+    
+    if kalshi_markets_exist:
+        try:
+            kalshi_df = pd.read_parquet(ACTIVE_MARKETS_PQ)
+            kalshi_count = len(kalshi_df)
+            kalshi_updated = datetime.datetime.fromtimestamp(os.path.getmtime(ACTIVE_MARKETS_PQ))
+        except:
+            kalshi_count = 0
+            kalshi_updated = None
+    else:
+        kalshi_count = 0
+        kalshi_updated = None
+    
+    status['kalshi'] = {
+        'available': kalshi_markets_exist,
+        'markets_count': kalshi_count,
+        'summary_available': kalshi_summary_exist,
+        'last_updated': kalshi_updated
+    }
+    
+    # Polymarket status
+    polymarket_markets_exist = os.path.exists(POLYMARKET_MARKETS_PQ)
+    polymarket_summary_exist = os.path.exists(POLYMARKET_SUMMARY_PQ)
+    
+    if polymarket_markets_exist:
+        try:
+            polymarket_df = pd.read_parquet(POLYMARKET_MARKETS_PQ)
+            polymarket_count = len(polymarket_df)
+            polymarket_updated = datetime.datetime.fromtimestamp(os.path.getmtime(POLYMARKET_MARKETS_PQ))
+        except:
+            polymarket_count = 0
+            polymarket_updated = None
+    else:
+        polymarket_count = 0
+        polymarket_updated = None
+    
+    status['polymarket'] = {
+        'available': polymarket_markets_exist,
+        'markets_count': polymarket_count,
+        'summary_available': polymarket_summary_exist,
+        'last_updated': polymarket_updated
+    }
+    
+    return status

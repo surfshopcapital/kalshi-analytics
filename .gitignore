@@ -54,10 +54,12 @@ Thumbs.db
 .streamlit/
 
 # Data files (if they contain sensitive information)
-data/
-*.parquet
+!data/
+!data/*.parquet
+!data/candles/  
+!data/candles/*.parquet
 *.csv
-*.json
+!data/changelog_items.json
 
 # Logs
 *.log

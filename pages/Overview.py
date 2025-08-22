@@ -8,7 +8,14 @@ from requests.exceptions import HTTPError
 import numpy as np
 import os
 
-from utils import API_KEY, get_client, load_active_markets_from_store, load_candles_from_store
+from utils import (
+    API_KEY, 
+    get_client, 
+    get_unified_markets, 
+    get_markets_by_source, 
+    load_candles_from_store
+)
+from shared_sidebar import render_shared_sidebar, get_selected_data_sources, get_selected_data_source_display
 
 def create_line_chart(df: pd.DataFrame, title: str) -> alt.Chart:
     """
@@ -81,7 +88,20 @@ def create_line_chart(df: pd.DataFrame, title: str) -> alt.Chart:
     return combined_chart
 
 def main():
+    st.set_page_config(page_title="Overview", layout="wide")
+    
+    # ── Render Shared Sidebar ─────────────────────────────────────────────
+    render_shared_sidebar()
+    
+    # ── Main Content ──────────────────────────────────────────────────────
     st.title("🏠 Market Overview")
+
+    # Get selected data sources
+    selected_sources = get_selected_data_sources()
+    data_source_display = get_selected_data_source_display()
+    
+    # Show data source indicator
+    st.info(f"📊 Showing data from: **{data_source_display}**")
 
     # Add CSS for clickable ticker styling
     st.markdown("""
@@ -129,7 +149,7 @@ def main():
             st.session_state.selected_title = qp_title
 
     # ── Load markets (cached for 5m) ───────────────────────────────
-    markets_df = load_active_markets_from_store()
+    markets_df = get_unified_markets()
     if markets_df.empty:
         st.error("Could not load markets—check your API key.")
         return
