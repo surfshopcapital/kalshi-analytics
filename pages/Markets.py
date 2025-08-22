@@ -4,6 +4,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+# Import helper to fix path issues
+import import_helper
+
 # Safe imports with fallbacks
 try:
     from utils import (

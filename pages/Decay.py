@@ -4,6 +4,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+# Import helper to fix path issues
+import import_helper
+
 from utils import (
     load_active_markets_from_store,
     get_events_to_series_mapping,

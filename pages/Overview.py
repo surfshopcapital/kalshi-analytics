@@ -8,6 +8,9 @@ from requests.exceptions import HTTPError
 import numpy as np
 import os
 
+# Import helper to fix path issues
+import import_helper
+
 # Safe imports with fallbacks
 try:
     from utils import (

@@ -2,6 +2,10 @@
 # CACHE_BUSTER: 20250822041530 - FORCE RELOAD
 
 import streamlit as st
+
+# Import helper to fix path issues
+import import_helper
+
 from shared_sidebar import render_shared_sidebar, get_selected_data_sources, get_selected_data_source_display
 
 # Add debug imports
@@ -114,3 +118,12 @@ if selected_sources:
             st.markdown("✅ **Selected** - Data will be loaded when available")
         else:
             st.markdown("❌ Not selected")
+
+def main():
+    """Main function for the dashboard"""
+    # The dashboard content is already rendered above
+    # This function is called by streamlit_app.py
+    pass
+
+if __name__ == "__main__":
+    main()

@@ -222,18 +222,36 @@ try:
             assert spec and spec.loader
             spec.loader.exec_module(md_config)
             API_KEY = getattr(md_config, "KALSHI_API_KEY_ID", "")
-            PRIVATE_KEY = getattr(md_config, "KALSHI_API_PRIVATE_KEY", "")
+            PRIVATE_KEY = getattr(md_config, "KALSHI_PRIVATE_KEY", "")
             PRIVATE_KEY_PATH = getattr(md_config, "KALSHI_PRIVATE_KEY_PATH", "")
         except Exception:
             # Fall back to env vars if local config load fails
             API_KEY = os.getenv('KALSHI_API_KEY_ID', "") if os else ""
-            PRIVATE_KEY = os.getenv('KALSHI_API_PRIVATE_KEY', "") if os else ""
+            PRIVATE_KEY = os.getenv('KALSHI_PRIVATE_KEY', "") if os else ""
             PRIVATE_KEY_PATH = os.getenv('KALSHI_PRIVATE_KEY_PATH', "") if os else ""
     else:
         # No local config file; use environment variables
         API_KEY = os.getenv('KALSHI_API_KEY_ID', "") if os else ""
-        PRIVATE_KEY = os.getenv('KALSHI_API_PRIVATE_KEY', "") if os else ""
+        PRIVATE_KEY = os.getenv('KALSHI_PRIVATE_KEY', "") if os else ""
         PRIVATE_KEY_PATH = os.getenv('KALSHI_PRIVATE_KEY_PATH', "") if os else ""
+        
+        # Debug logging for environment variables
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: Environment variables loaded:")
+            print(f"🔍 DEBUG: KALSHI_API_KEY_ID length: {len(API_KEY) if API_KEY else 0}")
+            print(f"🔍 DEBUG: KALSHI_PRIVATE_KEY length: {len(PRIVATE_KEY) if PRIVATE_KEY else 0}")
+            print(f"🔍 DEBUG: KALSHI_PRIVATE_KEY_PATH: {PRIVATE_KEY_PATH}")
+            print(f"🔍 DEBUG: API_KEY starts with: {API_KEY[:10] if API_KEY else 'None'}")
+            print(f"🔍 DEBUG: PRIVATE_KEY starts with: {PRIVATE_KEY[:20] if PRIVATE_KEY else 'None'}")
+            
+            # Also check environment variables directly
+            import os
+            env_api_key = os.getenv('KALSHI_API_KEY_ID', 'NOT_FOUND')
+            env_private_key = os.getenv('KALSHI_PRIVATE_KEY', 'NOT_FOUND')
+            print(f"🔍 DEBUG: Direct env check - KALSHI_API_KEY_ID: {env_api_key[:20] if env_api_key != 'NOT_FOUND' else 'NOT_FOUND'}")
+            print(f"🔍 DEBUG: Direct env check - KALSHI_PRIVATE_KEY: {env_private_key[:50] if env_private_key != 'NOT_FOUND' else 'NOT_FOUND'}")
+            print(f"🔍 DEBUG: Direct env check - API_KEY length: {len(env_api_key) if env_api_key != 'NOT_FOUND' else 0}")
+            print(f"🔍 DEBUG: Direct env check - PRIVATE_KEY length: {len(env_private_key) if env_private_key != 'NOT_FOUND' else 0}")
 except Exception:
     # Ultimate fallback
     API_KEY = ""
@@ -241,16 +259,58 @@ except Exception:
     PRIVATE_KEY_PATH = ""
 
 # ── Authentication helpers ─────────────────────────────────────────────
+def format_private_key(private_key: str) -> str:
+    """Format private key to ensure it's in correct PEM format"""
+    if not private_key:
+        return ""
+    
+    # Remove any extra whitespace or newlines
+    private_key = private_key.strip()
+    
+    # Check for various PEM formats
+    if (private_key.startswith('-----BEGIN RSA PRIVATE KEY-----') or 
+        private_key.startswith('-----BEGIN PRIVATE KEY-----') or
+        private_key.startswith('-----BEGIN')):
+        return private_key
+    
+    # If it doesn't start with -----BEGIN, try to format it
+    if len(private_key) > 100 and not private_key.startswith('-----'):
+        # Try to format as PEM
+        formatted_key = f"-----BEGIN PRIVATE KEY-----\n{private_key}\n-----END PRIVATE KEY-----"
+        return formatted_key
+    
+    return private_key
+
 def has_portfolio_auth() -> bool:
     """Return True if both API Key ID and a private key (inline or file) are available."""
     if not OS_AVAILABLE:
         return False
     try:
         api_id_available = bool(API_KEY)
-        inline_key_available = bool(PRIVATE_KEY and PRIVATE_KEY.startswith('-----BEGIN'))
+        
+        # Format the private key if needed
+        formatted_private_key = format_private_key(PRIVATE_KEY)
+        inline_key_available = bool(formatted_private_key and (
+            formatted_private_key.startswith('-----BEGIN RSA PRIVATE KEY-----') or
+            formatted_private_key.startswith('-----BEGIN PRIVATE KEY-----') or
+            formatted_private_key.startswith('-----BEGIN')
+        ))
+        
         file_key_available = bool(PRIVATE_KEY_PATH and os.path.exists(PRIVATE_KEY_PATH))
+        
+        # Debug logging
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: has_portfolio_auth check:")
+            print(f"🔍 DEBUG: API_KEY available: {api_id_available}")
+            print(f"🔍 DEBUG: PRIVATE_KEY original length: {len(PRIVATE_KEY) if PRIVATE_KEY else 0}")
+            print(f"🔍 DEBUG: PRIVATE_KEY formatted length: {len(formatted_private_key) if formatted_private_key else 0}")
+            print(f"🔍 DEBUG: PRIVATE_KEY starts with -----BEGIN: {inline_key_available}")
+            print(f"🔍 DEBUG: PRIVATE_KEY_PATH available: {file_key_available}")
+        
         return api_id_available and (inline_key_available or file_key_available)
-    except Exception:
+    except Exception as e:
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: Error in has_portfolio_auth: {e}")
         return False
 
 def get_auth_status() -> dict:
@@ -263,18 +323,35 @@ def get_auth_status() -> dict:
             "has_portfolio_auth": False,
         }
     try:
+        # Add debug information
+        api_key_present = bool(API_KEY)
+        private_key_present = bool(PRIVATE_KEY)
+        private_key_starts_correctly = bool(PRIVATE_KEY and (
+            PRIVATE_KEY.startswith('-----BEGIN RSA PRIVATE KEY-----') or
+            PRIVATE_KEY.startswith('-----BEGIN PRIVATE KEY-----') or
+            PRIVATE_KEY.startswith('-----BEGIN')
+        ))
+        private_key_length = len(PRIVATE_KEY) if PRIVATE_KEY else 0
+        private_key_preview = PRIVATE_KEY[:50] + "..." if PRIVATE_KEY and len(PRIVATE_KEY) > 50 else PRIVATE_KEY
+        
         return {
-            "api_key_id_present": bool(API_KEY),
-            "private_key_inline": bool(PRIVATE_KEY and PRIVATE_KEY.startswith('-----BEGIN')),
+            "api_key_id_present": api_key_present,
+            "private_key_inline": private_key_starts_correctly,
             "private_key_file": bool(PRIVATE_KEY_PATH and os.path.exists(PRIVATE_KEY_PATH)),
             "has_portfolio_auth": has_portfolio_auth(),
+            # Debug info
+            "debug_api_key_length": len(API_KEY) if API_KEY else 0,
+            "debug_private_key_length": private_key_length,
+            "debug_private_key_preview": private_key_preview,
+            "debug_private_key_starts_with_begin": private_key_starts_correctly,
         }
-    except Exception:
+    except Exception as e:
         return {
             "api_key_id_present": False,
             "private_key_inline": False,
             "private_key_file": False,
             "has_portfolio_auth": False,
+            "debug_error": str(e),
         }
 
 # ── Enhanced DuckDB Connection Pool with Better Performance ─────────────
@@ -753,7 +830,11 @@ def get_client() -> KalshiClient:
     """
     # For Kalshi API, we need both the API Key ID and private key for portfolio endpoints
     # The KalshiClient will handle the authentication method automatically
-    if PRIVATE_KEY and PRIVATE_KEY.startswith('-----BEGIN'):
+    if PRIVATE_KEY and (
+        PRIVATE_KEY.startswith('-----BEGIN RSA PRIVATE KEY-----') or
+        PRIVATE_KEY.startswith('-----BEGIN PRIVATE KEY-----') or
+        PRIVATE_KEY.startswith('-----BEGIN')
+    ):
         # We have a private key, use it for RSA signature authentication
         return KalshiClient(private_key=PRIVATE_KEY, api_key_id=API_KEY)
     elif PRIVATE_KEY_PATH and os.path.exists(PRIVATE_KEY_PATH):

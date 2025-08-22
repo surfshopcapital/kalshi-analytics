@@ -7,6 +7,9 @@ import datetime
 import numpy as np
 from html import escape
 
+# Import helper to fix path issues
+import import_helper
+
 # Safe imports with fallbacks
 try:
     from kalshi_client import KalshiClient

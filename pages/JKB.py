@@ -9,6 +9,9 @@ import os
 import duckdb
 from datetime import datetime, timedelta
 
+# Import helper to fix path issues
+import import_helper
+
 from utils import get_client, load_active_markets_from_store, load_candles_from_store, has_portfolio_auth, get_auth_status
 from kalshi_client import KalshiClient
 
@@ -594,11 +597,39 @@ def main():
         with st.expander("API Key Configuration Help", expanded=True):
             st.warning("Portfolio endpoints require both API Key ID and Private Key. Public endpoints will still function.")
             status = get_auth_status()
-            st.write({
+            
+            # Show detailed status
+            st.write("**Authentication Status:**")
+            st.json({
                 "api_key_id_present": status["api_key_id_present"],
                 "private_key_inline": status["private_key_inline"],
                 "private_key_file": status["private_key_file"],
+                "has_portfolio_auth": status["has_portfolio_auth"],
             })
+            
+            # Show debug information if available
+            if "debug_api_key_length" in status:
+                st.write("**Debug Information:**")
+                st.json({
+                    "API Key Length": status["debug_api_key_length"],
+                    "Private Key Length": status["debug_private_key_length"],
+                    "Private Key Preview": status["debug_private_key_preview"],
+                    "Starts with -----BEGIN": status["debug_private_key_starts_with_begin"],
+                })
+            
+            # Test environment variables directly
+            st.write("**Environment Variable Test:**")
+            import os
+            api_key_env = os.getenv('KALSHI_API_KEY_ID', 'NOT_FOUND')
+            private_key_env = os.getenv('KALSHI_PRIVATE_KEY', 'NOT_FOUND')
+            
+            st.json({
+                "KALSHI_API_KEY_ID from env": f"{api_key_env[:20]}{'...' if len(api_key_env) > 20 else ''}" if api_key_env != 'NOT_FOUND' else 'NOT_FOUND',
+                "KALSHI_PRIVATE_KEY from env": f"{private_key_env[:50]}{'...' if len(private_key_env) > 50 else ''}" if private_key_env != 'NOT_FOUND' else 'NOT_FOUND',
+                "API Key Length (env)": len(api_key_env) if api_key_env != 'NOT_FOUND' else 0,
+                "Private Key Length (env)": len(private_key_env) if private_key_env != 'NOT_FOUND' else 0,
+            })
+            
             st.markdown("- Set environment variables `KALSHI_API_KEY_ID` and `KALSHI_PRIVATE_KEY`, or\n- Run `python setup_api_keys.py` to create a local `config.py` (gitignored).")
     markets_df = load_active_markets_from_store()
     
