@@ -98,13 +98,33 @@ except ImportError:
     DUCKDB_AVAILABLE = False
     duckdb = None
 
+# Safe import for os and datetime
+try:
+    import os
+    import datetime
+    import time
+    from contextlib import contextmanager
+    OS_AVAILABLE = True
+except ImportError:
+    OS_AVAILABLE = False
+    os = None
+    datetime = None
+    time = None
+    contextmanager = None
+
 # ── Define your data directories here ─────────────────────────────
-BASE_DIR = os.path.dirname(__file__)
-DATA_DIR = os.path.join(BASE_DIR, "data")
+try:
+    BASE_DIR = os.path.dirname(__file__) if os else "."
+    DATA_DIR = os.path.join(BASE_DIR, "data") if os else "./data"
+except Exception:
+    BASE_DIR = "."
+    DATA_DIR = "./data"
 
 # Move directory creation to a function to avoid issues during import
 def ensure_directories():
     """Ensure all required directories exist"""
+    if not OS_AVAILABLE:
+        return
     try:
         os.makedirs(DATA_DIR, exist_ok=True)
         os.makedirs(os.path.join(DATA_DIR, "candles"), exist_ok=True)
@@ -115,15 +135,24 @@ def ensure_directories():
 # ensure_directories()  # Commented out to prevent import errors
 
 # File paths
-ACTIVE_MARKETS_PQ = os.path.join(DATA_DIR, "active_markets.parquet")
-SUMMARY_MARKETS_PQ = os.path.join(DATA_DIR, "summary_markets.parquet")
-CANDLES_DIR = os.path.join(DATA_DIR, "candles")
-SERIES_VOLUMES_PQ = os.path.join(DATA_DIR, "series_volumes.parquet")
-CHANGELOG_FILE = os.path.join(DATA_DIR, "changelog.json")
+try:
+    ACTIVE_MARKETS_PQ = os.path.join(DATA_DIR, "active_markets.parquet") if os else "./data/active_markets.parquet"
+    SUMMARY_MARKETS_PQ = os.path.join(DATA_DIR, "summary_markets.parquet") if os else "./data/summary_markets.parquet"
+    CANDLES_DIR = os.path.join(DATA_DIR, "candles") if os else "./data/candles"
+    SERIES_VOLUMES_PQ = os.path.join(DATA_DIR, "series_volumes.parquet") if os else "./data/series_volumes.parquet"
+    CHANGELOG_FILE = os.path.join(DATA_DIR, "changelog.json") if os else "./data/changelog.json"
 
-# NEW: Polymarket data files
-POLYMARKET_MARKETS_PQ = os.path.join(DATA_DIR, "polymarket_markets.parquet")
-POLYMARKET_SUMMARY_PQ = os.path.join(DATA_DIR, "polymarket_summary.parquet")
+    # NEW: Polymarket data files
+    POLYMARKET_MARKETS_PQ = os.path.join(DATA_DIR, "polymarket_markets.parquet") if os else "./data/polymarket_markets.parquet"
+    POLYMARKET_SUMMARY_PQ = os.path.join(DATA_DIR, "polymarket_summary.parquet") if os else "./data/polymarket_summary.parquet"
+except Exception:
+    ACTIVE_MARKETS_PQ = "./data/active_markets.parquet"
+    SUMMARY_MARKETS_PQ = "./data/summary_markets.parquet"
+    CANDLES_DIR = "./data/candles"
+    SERIES_VOLUMES_PQ = "./data/series_volumes.parquet"
+    CHANGELOG_FILE = "./data/changelog.json"
+    POLYMARKET_MARKETS_PQ = "./data/polymarket_markets.parquet"
+    POLYMARKET_SUMMARY_PQ = "./data/polymarket_summary.parquet"
 
 """
 Configuration loading with collision-safe import.
@@ -135,31 +164,38 @@ PRIVATE_KEY = ""
 PRIVATE_KEY_PATH = ""
 
 # First, try to import a local config.py next to this file
-_local_config_path = os.path.join(BASE_DIR, "config.py")
-if os.path.exists(_local_config_path):
-    try:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("md_config", _local_config_path)
-        md_config = importlib.util.module_from_spec(spec)
-        assert spec and spec.loader
-        spec.loader.exec_module(md_config)
-        API_KEY = getattr(md_config, "KALSHI_API_KEY_ID", "")
-        PRIVATE_KEY = getattr(md_config, "KALSHI_API_PRIVATE_KEY", "")
-        PRIVATE_KEY_PATH = getattr(md_config, "KALSHI_PRIVATE_KEY_PATH", "")
-    except Exception:
-        # Fall back to env vars if local config load fails
-        API_KEY = os.getenv('KALSHI_API_KEY_ID', "")
-        PRIVATE_KEY = os.getenv('KALSHI_API_PRIVATE_KEY', "")
-        PRIVATE_KEY_PATH = os.getenv('KALSHI_PRIVATE_KEY_PATH', "")
-else:
-    # No local config file; use environment variables
-    API_KEY = os.getenv('KALSHI_API_KEY_ID', "")
-    PRIVATE_KEY = os.getenv('KALSHI_API_PRIVATE_KEY', "")
-    PRIVATE_KEY_PATH = os.getenv('KALSHI_PRIVATE_KEY_PATH', "")
+try:
+    if os and os.path.exists(os.path.join(BASE_DIR, "config.py")):
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("md_config", os.path.join(BASE_DIR, "config.py"))
+            md_config = importlib.util.module_from_spec(spec)
+            assert spec and spec.loader
+            spec.loader.exec_module(md_config)
+            API_KEY = getattr(md_config, "KALSHI_API_KEY_ID", "")
+            PRIVATE_KEY = getattr(md_config, "KALSHI_API_PRIVATE_KEY", "")
+            PRIVATE_KEY_PATH = getattr(md_config, "KALSHI_PRIVATE_KEY_PATH", "")
+        except Exception:
+            # Fall back to env vars if local config load fails
+            API_KEY = os.getenv('KALSHI_API_KEY_ID', "") if os else ""
+            PRIVATE_KEY = os.getenv('KALSHI_API_PRIVATE_KEY', "") if os else ""
+            PRIVATE_KEY_PATH = os.getenv('KALSHI_PRIVATE_KEY_PATH', "") if os else ""
+    else:
+        # No local config file; use environment variables
+        API_KEY = os.getenv('KALSHI_API_KEY_ID', "") if os else ""
+        PRIVATE_KEY = os.getenv('KALSHI_API_PRIVATE_KEY', "") if os else ""
+        PRIVATE_KEY_PATH = os.getenv('KALSHI_PRIVATE_KEY_PATH', "") if os else ""
+except Exception:
+    # Ultimate fallback
+    API_KEY = ""
+    PRIVATE_KEY = ""
+    PRIVATE_KEY_PATH = ""
 
 # ── Authentication helpers ─────────────────────────────────────────────
 def has_portfolio_auth() -> bool:
     """Return True if both API Key ID and a private key (inline or file) are available."""
+    if not OS_AVAILABLE:
+        return False
     try:
         api_id_available = bool(API_KEY)
         inline_key_available = bool(PRIVATE_KEY and PRIVATE_KEY.startswith('-----BEGIN'))
@@ -170,12 +206,27 @@ def has_portfolio_auth() -> bool:
 
 def get_auth_status() -> dict:
     """Return a small status dict describing how auth will be performed."""
-    return {
-        "api_key_id_present": bool(API_KEY),
-        "private_key_inline": bool(PRIVATE_KEY and PRIVATE_KEY.startswith('-----BEGIN')),
-        "private_key_file": bool(PRIVATE_KEY_PATH and os.path.exists(PRIVATE_KEY_PATH)),
-        "has_portfolio_auth": has_portfolio_auth(),
-    }
+    if not OS_AVAILABLE:
+        return {
+            "api_key_id_present": False,
+            "private_key_inline": False,
+            "private_key_file": False,
+            "has_portfolio_auth": False,
+        }
+    try:
+        return {
+            "api_key_id_present": bool(API_KEY),
+            "private_key_inline": bool(PRIVATE_KEY and PRIVATE_KEY.startswith('-----BEGIN')),
+            "private_key_file": bool(PRIVATE_KEY_PATH and os.path.exists(PRIVATE_KEY_PATH)),
+            "has_portfolio_auth": has_portfolio_auth(),
+        }
+    except Exception:
+        return {
+            "api_key_id_present": False,
+            "private_key_inline": False,
+            "private_key_file": False,
+            "has_portfolio_auth": False,
+        }
 
 # ── Enhanced DuckDB Connection Pool with Better Performance ─────────────
 @safe_cache_resource()

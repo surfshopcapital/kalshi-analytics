@@ -94,10 +94,17 @@ def render_shared_sidebar():
             
     except Exception as e:
         # Fallback if anything goes wrong
-        st.sidebar.error(f"⚠️ Sidebar error: {str(e)}")
-        st.sidebar.markdown("## 📊 Data Source")
-        st.sidebar.markdown("**Kalshi** (default)")
-        st.session_state.selected_data_source = 'Kalshi'
+        try:
+            st.sidebar.error(f"⚠️ Sidebar error: {str(e)}")
+            st.sidebar.markdown("## 📊 Data Source")
+            st.sidebar.markdown("**Kalshi** (default)")
+            st.session_state.selected_data_source = 'Kalshi'
+        except:
+            # Ultimate fallback - just set a default
+            try:
+                st.session_state.selected_data_source = 'Kalshi'
+            except:
+                pass
 
 def get_selected_data_sources():
     """
@@ -109,15 +116,18 @@ def get_selected_data_sources():
     if not STREAMLIT_AVAILABLE or st is None:
         return ['kalshi']  # Default fallback
     
-    selected = st.session_state.get('selected_data_source', 'Both')
-    
-    if selected == 'Both':
-        return ['kalshi', 'polymarket']
-    elif selected == 'Kalshi':
-        return ['kalshi']
-    elif selected == 'Polymarket':
-        return ['polymarket']
-    else:
+    try:
+        selected = st.session_state.get('selected_data_source', 'Both')
+        
+        if selected == 'Both':
+            return ['kalshi', 'polymarket']
+        elif selected == 'Kalshi':
+            return ['kalshi']
+        elif selected == 'Polymarket':
+            return ['polymarket']
+        else:
+            return ['kalshi']  # Default fallback
+    except Exception:
         return ['kalshi']  # Default fallback
 
 def get_selected_data_source_display():
@@ -130,5 +140,8 @@ def get_selected_data_source_display():
     if not STREAMLIT_AVAILABLE or st is None:
         return "Kalshi (default)"
     
-    selected = st.session_state.get('selected_data_source', 'Both')
-    return selected if selected else "Kalshi (default)"
+    try:
+        selected = st.session_state.get('selected_data_source', 'Both')
+        return selected if selected else "Kalshi (default)"
+    except Exception:
+        return "Kalshi (default)"
