@@ -210,13 +210,13 @@ if __name__ == "__main__":
         print("🔄 Starting parquet refresh...")
         
         # Refresh active markets
-        refresh_active_markets()
+        df_active = refresh_active_markets()  # Store the returned DataFrame
         
-        # Build summary table (fix function name)
-        refresh_summary()  # Changed from build_summary_table()
+        # Build summary table (pass the DataFrame)
+        refresh_summary(df_active)  # Pass the DataFrame as argument
         
-        # Build series volumes (fix function name)
-        write_series_volumes()  # Changed from build_series_volumes()
+        # Build series volumes
+        write_series_volumes()
         
         # Refresh candles (this might fail on first run, which is OK)
         try:
