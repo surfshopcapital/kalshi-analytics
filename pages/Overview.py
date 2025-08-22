@@ -121,13 +121,15 @@ def create_line_chart(df: pd.DataFrame, title: str) -> alt.Chart:
     return combined_chart
 
 def main():
-    st.set_page_config(page_title="Overview", layout="wide")
+    # Page title and description (no set_page_config needed for pages)
+    st.title("Market Overview")
+    st.markdown("Get a comprehensive overview of all active markets")
     
     # ── Render Shared Sidebar ─────────────────────────────────────────────
     render_shared_sidebar()
     
     # ── Main Content ──────────────────────────────────────────────────────
-    st.title("🏠 Market Overview")
+    # st.title("🏠 Market Overview") # This line is removed as per the edit hint
 
     # Get selected data sources
     selected_sources = get_selected_data_sources()

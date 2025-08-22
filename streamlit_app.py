@@ -12,8 +12,9 @@ project_root = Path(__file__).parent.absolute()
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-# Now import and run the main dashboard
+# Import the main dashboard function
 from Dashboard import main
 
+# Run the main function
 if __name__ == "__main__":
     main()

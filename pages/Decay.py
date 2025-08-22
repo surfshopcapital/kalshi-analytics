@@ -114,8 +114,9 @@ def parse_time_to_target(time_str) -> float:
         return np.nan
 
 def main():
-    st.set_page_config(page_title="Decay Strategy", layout="wide")
-    st.title("⏰ Decay Strategy")
+    # Page title and description (no set_page_config needed for pages)
+    st.title("Decay Strategy")
+    st.markdown("Analyze time decay strategies for low-probability markets")
     
     st.markdown("""
     This page identifies markets with **high probability outcomes** (≥90¢ bids) where you can capture the final **time decay** premium.

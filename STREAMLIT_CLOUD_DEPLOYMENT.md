@@ -1,140 +1,172 @@
 # Streamlit Cloud Deployment Guide
 
-This guide explains how to deploy your Market Dashboards application to Streamlit Cloud and fix the import issues.
+## Overview
+This guide explains how to deploy your Market Dashboards application to Streamlit Cloud with proper API key configuration.
 
-## Problem Description
-
-When running locally, the application works fine because Python can find the local modules. However, on Streamlit Cloud, the Python path doesn't include the project root directory, causing import errors like:
-
-```
-KeyError: 'utils'
-```
-
-## Solution Implemented
-
-### 1. Import Helper (`import_helper.py`)
-
-Created a comprehensive import helper that:
-- Adds the project root to Python path
-- Handles Streamlit Cloud's `/mount/src/` directory structure
-- Provides fallback import methods
-- Gives detailed debug information
-
-### 2. Updated All Page Files
-
-Modified all page files in the `pages/` directory to:
-- Import the `import_helper` module first
-- Use proper import paths
-- Handle import failures gracefully
-
-### 3. Streamlit Configuration
-
-Created proper Streamlit configuration files:
-- `.streamlit/config.toml` - Main configuration
-- `.streamlit/secrets.toml` - Secrets template
-- `packages.txt` - System dependencies
-
-### 4. Package Structure
-
-Added proper Python package structure:
-- `__init__.py` files in root and pages directories
-- `setup.py` for package installation
-- `streamlit_app.py` as main entry point
-
-## Files Modified
-
-### Core Files
-- `Dashboard.py` - Added main function and import helper
-- `import_helper.py` - New comprehensive import helper
-- `streamlit_app.py` - New main entry point
-
-### Page Files
-- `pages/Decay.py` - Updated imports
-- `pages/JKB.py` - Updated imports
-- `pages/Markets.py` - Updated imports
-- `pages/Overview.py` - Updated imports
-- `pages/Movers.py` - Updated imports
-- `pages/Series.py` - Updated imports
-
-### Configuration Files
-- `.streamlit/config.toml` - Streamlit configuration
-- `.streamlit/secrets.toml` - Secrets template
-- `packages.txt` - System dependencies
-- `setup.py` - Package setup
-- `__init__.py` - Package markers
-
-## How It Works
-
-1. **Import Helper**: When any page loads, `import_helper.py` runs first and sets up the Python path
-2. **Path Resolution**: The helper adds multiple possible paths including Streamlit Cloud's mount directories
-3. **Fallback Imports**: If direct imports fail, the helper tries alternative import methods
-4. **Debug Information**: Detailed logging shows what's happening during import
+## Prerequisites
+- GitHub repository with your code
+- Streamlit Cloud account
+- Kalshi API credentials (API Key ID and Private Key)
 
 ## Deployment Steps
 
-### 1. Push to GitHub
-```bash
-git add .
-git commit -m "Fix Streamlit Cloud import issues"
-git push origin main
+### 1. Repository Setup
+Ensure your repository has the following files:
+- `streamlit_app.py` (main entry point)
+- `requirements.txt` (Python dependencies)
+- `packages.txt` (system packages - can be empty)
+- `.gitignore` (excludes config.py and private keys)
+- `kalshi_private_key.pem` (your private key file - **IMPORTANT: This should NOT be committed to git**)
+
+### 2. API Key Configuration for Streamlit Cloud
+
+#### Option A: Private Key File (Recommended for Security)
+1. **Create your private key file locally:**
+   - Create `kalshi_private_key.pem` in your project root
+   - Paste your private key content (PEM format)
+   - Ensure the file is in `.gitignore` (already done)
+
+2. **Set environment variables in Streamlit Cloud:**
+   - Go to your Streamlit Cloud app settings
+   - Navigate to "Secrets" section
+   - Add the following secrets:
+
+```toml
+[KALSHI_API_KEY_ID]
+"your_api_key_id_here"
+
+[KALSHI_PRIVATE_KEY_PATH]
+"kalshi_private_key.pem"
 ```
 
-### 2. Connect to Streamlit Cloud
-- Go to [share.streamlit.io](https://share.streamlit.io)
-- Connect your GitHub repository
-- Set the main file path to `streamlit_app.py`
+3. **Upload your private key file:**
+   - In Streamlit Cloud, go to "Files" section
+   - Upload your `kalshi_private_key.pem` file
+   - This keeps your private key secure and separate from code
 
-### 3. Configure Secrets
-- In Streamlit Cloud, go to your app settings
-- Add the secrets from `.streamlit/secrets.toml`
-- Set the actual API keys and configuration values
+#### Option B: Environment Variables (Alternative)
+If you prefer to use environment variables directly:
 
-### 4. Deploy
-- Streamlit Cloud will automatically deploy your app
-- Check the logs for import status messages
-- The import helper will show detailed debug information
+```toml
+[KALSHI_API_KEY_ID]
+"your_api_key_id_here"
 
-## Testing Locally
-
-To test the import fixes locally:
-
-```bash
-python test_imports.py
+[KALSHI_PRIVATE_KEY]
+"-----BEGIN RSA PRIVATE KEY-----
+your_private_key_content_here
+-----END RSA PRIVATE KEY-----"
 ```
 
-This will verify that all modules can be imported correctly.
+### 3. Deploy to Streamlit Cloud
+1. Connect your GitHub repository
+2. Set the main file path to `streamlit_app.py`
+3. Deploy the app
 
 ## Troubleshooting
 
-### Import Still Fails
-1. Check the Streamlit Cloud logs for debug messages
-2. Verify the import helper is running
-3. Check if the mount paths exist on Streamlit Cloud
+### Common Issues
 
-### Module Not Found
-1. Ensure all `__init__.py` files are present
-2. Check that the import helper is imported first
-3. Verify the file structure matches the expected layout
+#### 1. "Unable to locate package packages" Error
+This error typically occurs when:
+- There are hidden characters in `packages.txt`
+- The file is corrupted during upload
+- Streamlit Cloud has parsing issues
 
-### Streamlit Configuration Issues
-1. Check `.streamlit/config.toml` syntax
-2. Verify secrets are properly configured
-3. Ensure `packages.txt` contains required system packages
+**Solution:**
+- Ensure `packages.txt` is clean and contains only comments
+- Try recreating the file with simple content
+- Check for any hidden characters or encoding issues
 
-## Expected Behavior
+#### 2. Portfolio Data Not Loading
+**Symptoms:**
+- JKB page shows "No portfolio data available"
+- Authentication status shows missing private key
 
-After deployment:
-1. Import helper runs and sets up paths
-2. All page imports succeed
-3. Dashboard loads without import errors
-4. Debug messages show successful imports
+**Solutions:**
+1. **For file-based approach:** Ensure `kalshi_private_key.pem` is uploaded to Streamlit Cloud
+2. **For environment variables:** Verify both API Key ID and Private Key are set correctly
+3. Check that the private key format is correct (PEM format)
+4. Ensure both API Key ID and Private Key are provided
 
-## Monitoring
+#### 3. Authentication Errors
+**Common causes:**
+- Private key format incorrect
+- Missing environment variables
+- Private key file not uploaded to Streamlit Cloud
+- Incorrect API endpoint URLs
 
-Watch the Streamlit Cloud logs for:
-- ✅ Successfully imported utils module
-- ✅ Successfully imported shared_sidebar module
-- ✅ Successfully imported kalshi_client module
-- ✅ Successfully imported polymarket_client module
+**Debugging:**
+- Check the authentication status display on the JKB page
+- Verify environment variable values in Streamlit Cloud
+- Ensure private key file is uploaded if using file-based approach
+- Test API connectivity with simple endpoints first
 
-If you see ❌ messages, the import helper will provide detailed error information to help debug the issue.
+### Debug Information
+The JKB page includes a debug section that shows:
+- API key presence
+- Private key format validation
+- Environment variable status
+- Authentication method being used
+
+## Security Best Practices
+
+### 1. Never Commit Sensitive Data
+- Keep `config.py` in `.gitignore`
+- Keep `kalshi_private_key.pem` in `.gitignore`
+- Use environment variables for production
+- Avoid hardcoding API keys in source code
+
+### 2. Streamlit Cloud Security
+- Use Streamlit's built-in secrets management
+- Upload private key files securely
+- Rotate API keys regularly
+- Monitor API usage and costs
+
+### 3. API Key Management
+- Use separate API keys for development and production
+- Implement proper access controls
+- Monitor API usage patterns
+
+## Testing Your Deployment
+
+### 1. Local Testing
+```bash
+# Test with private key file
+# Ensure kalshi_private_key.pem exists in project root
+streamlit run streamlit_app.py
+
+# Test with environment variables
+export KALSHI_API_KEY_ID="your_key_id"
+export KALSHI_PRIVATE_KEY_PATH="kalshi_private_key.pem"
+streamlit run streamlit_app.py
+```
+
+### 2. Cloud Testing
+- Deploy to Streamlit Cloud
+- Check authentication status on JKB page
+- Test portfolio data loading
+- Verify error handling works correctly
+
+## Support
+
+If you encounter issues:
+1. Check the authentication status on the JKB page
+2. Verify environment variables in Streamlit Cloud
+3. Ensure private key file is uploaded if using file-based approach
+4. Check the Streamlit Cloud logs for errors
+5. Ensure your API keys are valid and active
+
+## File Structure
+```
+Market_Dashboards/
+├── streamlit_app.py          # Main entry point
+├── requirements.txt          # Python dependencies
+├── packages.txt             # System packages (can be empty)
+├── .streamlit/              # Streamlit configuration
+│   └── secrets.toml        # Local secrets (optional)
+├── config.py               # Local configuration (gitignored)
+├── kalshi_private_key.pem  # Private key file (gitignored)
+├── .gitignore              # Excludes sensitive files
+└── pages/                  # Streamlit pages
+    └── JKB.py             # Portfolio dashboard
+```

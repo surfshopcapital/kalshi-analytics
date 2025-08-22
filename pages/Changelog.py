@@ -64,10 +64,12 @@ def get_status_color(status: str) -> str:
         "Done": "🟢",
         "Cancelled": "⚫"
     }
-    return colors.get(status, "🔴")
+    return colors.get(status, "��")
 
 def main():
-    st.set_page_config(page_title="Changelog", layout="wide", page_icon="📝")
+    # Page title and description (no set_page_config needed for pages)
+    st.title("Changelog")
+    st.markdown("Track changes and updates to the dashboard")
     
     # ── Compact header with styling ──────────────────────────────────
     st.markdown("""

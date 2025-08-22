@@ -413,8 +413,9 @@ def filter_by_expiration_time(df: pd.DataFrame, min_hours_to_expiration: int) ->
         return df
 
 def main():
-    st.set_page_config(page_title="Market Movers", layout="wide")
-    st.title("📈 Market Movers")
+    # Page title and description (no set_page_config needed for pages)
+    st.title("Market Movers")
+    st.markdown("Track the biggest 24-hour price movers by notional value")
     
     st.markdown("""
     This page shows the biggest 24-hour and 7-day price movers among active Kalshi events.

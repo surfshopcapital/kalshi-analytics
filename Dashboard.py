@@ -26,50 +26,55 @@ def debug_dashboard_startup():
         print(f"🔍 DEBUG: Available modules = {[m for m in sys.modules.keys() if 'utils' in m or 'shared_sidebar' in m]}")
     return True
 
-# Call this before render_shared_sidebar()
-try:
-    debug_dashboard_startup()
-    render_shared_sidebar()
-except Exception as e:
-    if DEBUG_AVAILABLE:
-        print(f"🔍 DEBUG: Error in dashboard startup: {e}")
-        print(f"🔍 DEBUG: Error type: {type(e)}")
-        traceback.print_exc()
-    st.error(f"Dashboard startup error: {e}")
-
-# Global Streamlit configuration
-st.set_page_config(
-    page_title="Market Analytics Dashboard",
-    page_icon="📈",
-    layout="wide",
-)
-
-# ── Render Shared Sidebar ─────────────────────────────────────────────
-# render_shared_sidebar() # This line is now handled by the try-except block above
-
-# ── Main Dashboard Content ─────────────────────────────────────────────
-st.markdown("""
+def main():
+    """Main function for the dashboard"""
+    # Global Streamlit configuration - must be first
+    st.set_page_config(
+        page_title="Market Analytics Dashboard",
+        page_icon="📈",
+        layout="wide",
+    )
+    
+    # Call debug function
+    try:
+        debug_dashboard_startup()
+    except Exception as e:
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: Error in debug startup: {e}")
+    
+    # Render the shared sidebar
+    try:
+        render_shared_sidebar()
+    except Exception as e:
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: Error in sidebar rendering: {e}")
+            print(f"🔍 DEBUG: Error type: {type(e)}")
+            traceback.print_exc()
+        st.error(f"Sidebar rendering error: {e}")
+    
+    # ── Main Dashboard Content ─────────────────────────────────────────────
+    st.markdown("""
 # 📊 Market Analytics Dashboard
 
 Welcome to your unified market analytics platform! This dashboard now supports multiple data sources:
 
 """)
 
-# Get selected data sources
-selected_sources = get_selected_data_sources()
-data_source_display = get_selected_data_source_display()
+    # Get selected data sources
+    selected_sources = get_selected_data_sources()
+    data_source_display = get_selected_data_source_display()
 
-# Show selected data sources
-if selected_sources:
-    sources_text = ", ".join([s.capitalize() for s in selected_sources])
-    st.success(f"✅ **Active Data Sources**: {sources_text}")
-    
-    # TEMPORARY: Don't show market count until we can fix the utils import
-    st.info(f"📊 **Data Source**: {data_source_display}")
-else:
-    st.warning("⚠️ Please select at least one data source from the sidebar")
+    # Show selected data sources
+    if selected_sources:
+        sources_text = ", ".join([s.capitalize() for s in selected_sources])
+        st.success(f"✅ **Active Data Sources**: {sources_text}")
+        
+        # TEMPORARY: Don't show market count until we can fix the utils import
+        st.info(f"📊 **Data Source**: {data_source_display}")
+    else:
+        st.warning("⚠️ Please select at least one data source from the sidebar")
 
-st.markdown("""
+    st.markdown("""
 ## 🧭 Navigation
 
 Use the sidebar to navigate between pages:
@@ -99,31 +104,25 @@ Use the sidebar to navigate between pages:
 *Data is automatically combined and normalized for seamless analysis across platforms.*
 """)
 
-# ── Data Source Information ─────────────────────────────────────────────
-if selected_sources:
-    st.markdown("## 📋 Data Source Details")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### 🔍 Kalshi Markets")
-        if 'kalshi' in selected_sources:
-            st.markdown("✅ **Selected** - Data will be loaded when available")
-        else:
-            st.markdown("❌ Not selected")
-    
-    with col2:
-        st.markdown("### 🔗 Polymarket Markets")
-        if 'polymarket' in selected_sources:
-            st.markdown("✅ **Selected** - Data will be loaded when available")
-        else:
-            st.markdown("❌ Not selected")
-
-def main():
-    """Main function for the dashboard"""
-    # The dashboard content is already rendered above
-    # This function is called by streamlit_app.py
-    pass
+    # ── Data Source Information ─────────────────────────────────────────────
+    if selected_sources:
+        st.markdown("## 📋 Data Source Details")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("### 🔍 Kalshi Markets")
+            if 'kalshi' in selected_sources:
+                st.markdown("✅ **Selected** - Data will be loaded when available")
+            else:
+                st.markdown("❌ Not selected")
+        
+        with col2:
+            st.markdown("### 🔗 Polymarket Markets")
+            if 'polymarket' in selected_sources:
+                st.markdown("✅ **Selected** - Data will be loaded when available")
+            else:
+                st.markdown("❌ Not selected")
 
 if __name__ == "__main__":
     main()

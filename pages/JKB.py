@@ -567,13 +567,7 @@ def create_clean_positions_table(positions_df: pd.DataFrame) -> pd.DataFrame:
     return display_df[column_order]
 
 def main():
-    st.set_page_config(
-        page_title="JKB Portfolio Dashboard",
-        page_icon="🎯",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-    
+    # Page title and description (no set_page_config needed for pages)
     st.title("JKB Portfolio Dashboard")
     st.markdown("Track your live Kalshi positions and portfolio performance")
     
@@ -777,7 +771,7 @@ def main():
                 return f'background-color: rgba(211, 211, 211, 0.1)'
         
         # Apply styling to the dataframe
-        styled_positions = filtered_positions.style.applymap(
+        styled_positions = filtered_positions.style.map(
             color_pnl, 
             subset=['total_pnl_dollars']
         )

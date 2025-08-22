@@ -323,8 +323,9 @@ def create_volume_chart(markets_df: pd.DataFrame, series_ticker: str, selected_s
     return chart
 
 def main():
-    st.set_page_config(page_title="Series Analysis", layout="wide")
-    st.title("📊 Series Analysis")
+    # Page title and description (no set_page_config needed for pages)
+    st.title("Series Analysis")
+    st.markdown("Analyze market series and trends across different data sources")
     
     st.markdown("""
     This page allows you to analyze markets within specific Kalshi series (e.g., KXPGATOUR for PGA Tour events).

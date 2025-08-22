@@ -59,7 +59,9 @@ import urllib.parse
 import os
 
 def main():
-    st.set_page_config(page_title="Markets", layout="wide")
+    # Page title and description (no set_page_config needed for pages)
+    st.title("Markets Explorer")
+    st.markdown("Explore and analyze all active markets")
     
     # ── Render Shared Sidebar ─────────────────────────────────────────────
     render_shared_sidebar()
