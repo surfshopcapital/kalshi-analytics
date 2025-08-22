@@ -50,16 +50,10 @@ api_keys.txt
 .DS_Store
 Thumbs.db
 
-# Streamlit
-.streamlit/
-
-# Data files (if they contain sensitive information)
-!data/
-!data/*.parquet
-!data/candles/  
-!data/candles/*.parquet
+# Data files (large files that change frequently)
+data/*.parquet
+data/candles/*.parquet
 *.csv
-!data/changelog_items.json
 
 # Logs
 *.log
