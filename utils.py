@@ -53,6 +53,40 @@ except Exception as e:
         print(f"🔍 DEBUG: Error in debug_import_status: {e}")
         traceback.print_exc()
 
+# ── CRITICAL: Ensure get_data_source_status is always available ─────────────────
+def get_data_source_status() -> dict:
+    """
+    Get status of all data sources.
+    This is a fallback version that's always available.
+    """
+    if DEBUG_AVAILABLE:
+        print(f"🔍 DEBUG: get_data_source_status() called")
+    
+    try:
+        return {
+            'kalshi': {
+                'available': True,
+                'markets_count': 0,
+                'summary_available': True,
+                'last_updated': None
+            },
+            'polymarket': {
+                'available': True,
+                'markets_count': 0,
+                'summary_available': True,
+                'last_updated': None
+            }
+        }
+    except Exception as e:
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: Error in get_data_source_status: {e}")
+            traceback.print_exc()
+        # Return safe fallback
+        return {
+            'kalshi': {'available': False, 'markets_count': 0, 'summary_available': False, 'last_updated': None},
+            'polymarket': {'available': False, 'markets_count': 0, 'summary_available': False, 'last_updated': None}
+        }
+
 # Helper functions for Streamlit decorators when streamlit is not available
 def safe_cache_data(ttl=None):
     """Safe wrapper for st.cache_data decorator"""
@@ -1342,38 +1376,6 @@ def get_unified_summary(data_sources: list = None) -> pd.DataFrame:
     combined_summary = pd.concat(all_summaries, ignore_index=True)
     return combined_summary
 
-# ── CRITICAL: Ensure get_data_source_status is always available ─────────────────
-def get_data_source_status() -> dict:
-    """
-    Get status of all data sources.
-    This is a fallback version that's always available.
-    """
-    if DEBUG_AVAILABLE:
-        print(f"🔍 DEBUG: get_data_source_status() called")
-    
-    try:
-        return {
-            'kalshi': {
-                'available': True,
-                'markets_count': 0,
-                'summary_available': True,
-                'last_updated': None
-            },
-            'polymarket': {
-                'available': True,
-                'markets_count': 0,
-                'summary_available': True,
-                'last_updated': None
-            }
-        }
-    except Exception as e:
-        if DEBUG_AVAILABLE:
-            print(f"🔍 DEBUG: Error in get_data_source_status: {e}")
-            traceback.print_exc()
-        # Return safe fallback
-        return {
-            'kalshi': {'available': False, 'markets_count': 0, 'summary_available': False, 'last_updated': None},
-            'polymarket': {'available': False, 'markets_count': 0, 'summary_available': False, 'last_updated': None}
-        }
+
 
 
