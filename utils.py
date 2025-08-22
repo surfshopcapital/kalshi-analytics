@@ -1,11 +1,78 @@
 # utils.py
 
-import streamlit as st
+# Try to import streamlit, but make it optional to prevent import errors
+try:
+    import streamlit as st
+    STREAMLIT_AVAILABLE = True
+except ImportError:
+    STREAMLIT_AVAILABLE = False
+    st = None
+
 import pandas as pd
 import datetime
 import os
 import time
 from contextlib import contextmanager
+
+# Helper functions for Streamlit decorators when streamlit is not available
+def safe_cache_data(ttl=None):
+    """Safe wrapper for st.cache_data decorator"""
+    if STREAMLIT_AVAILABLE and st is not None:
+        return st.cache_data(ttl=ttl)
+    else:
+        # Return a no-op decorator
+        def decorator(func):
+            return func
+        return decorator
+
+def safe_cache_resource():
+    """Safe wrapper for st.cache_resource decorator"""
+    if STREAMLIT_AVAILABLE and st is not None:
+        return st.cache_resource
+    else:
+        # Return a no-op decorator
+        def decorator(func):
+            return func
+        return decorator
+
+def safe_error(message):
+    """Safe wrapper for st.error"""
+    if STREAMLIT_AVAILABLE and st is not None:
+        safe_error(message)
+    else:
+        print(f"ERROR: {message}")
+
+def safe_button(text, key=None, help=None):
+    """Safe wrapper for st.button"""
+    if STREAMLIT_AVAILABLE and st is not None:
+        return st.button(text, key=key, help=help)
+    else:
+        return False
+
+def safe_session_state():
+    """Safe wrapper for st.session_state"""
+    if STREAMLIT_AVAILABLE and st is not None:
+        return st.session_state
+    else:
+        # Return a simple dict-like object
+        class MockSessionState:
+            def __init__(self):
+                self._data = {}
+            def get(self, key, default=None):
+                return self._data.get(key, default)
+            def __setattr__(self, key, value):
+                if key == '_data':
+                    super().__setattr__(key, value)
+                else:
+                    self._data[key] = value
+        return MockSessionState()
+
+def safe_switch_page(page):
+    """Safe wrapper for st.switch_page"""
+    if STREAMLIT_AVAILABLE and st is not None:
+        st.switch_page(page)
+    else:
+        print(f"Would switch to page: {page}")
 
 # Try to import optional dependencies
 try:
@@ -111,11 +178,11 @@ def get_auth_status() -> dict:
     }
 
 # ── Enhanced DuckDB Connection Pool with Better Performance ─────────────
-@st.cache_resource
+@safe_cache_resource()
 def get_duckdb_connection():
     """Get a cached DuckDB connection with advanced optimizations"""
     if not DUCKDB_AVAILABLE:
-        st.error("DuckDB is not available. Please install it with: pip install duckdb")
+        safe_error("DuckDB is not available. Please install it with: pip install duckdb")
         return None
         
     con = duckdb.connect(':memory:')
@@ -139,7 +206,7 @@ def get_duckdb_connection():
 def get_fresh_duckdb_connection():
     """Get a fresh DuckDB connection for operations that need it"""
     if not DUCKDB_AVAILABLE:
-        st.error("DuckDB is not available. Please install it with: pip install duckdb")
+        safe_error("DuckDB is not available. Please install it with: pip install duckdb")
         return None
         
     con = duckdb.connect(':memory:')
@@ -179,7 +246,7 @@ def duckdb_query_optimized(query: str, params: dict = None, explain: bool = Fals
     """Execute optimized DuckDB query with performance monitoring"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
 
         # Add query optimization hints
@@ -207,7 +274,7 @@ def duckdb_write_optimized(df: pd.DataFrame, path: str, compression: str = "snap
     """Write DataFrame to Parquet using DuckDB with advanced optimizations"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return
         # Register DataFrame as a temporary table
         con.register("temp_df", df)
@@ -227,7 +294,7 @@ def duckdb_read_optimized(path: str, columns: list = None, filters: dict = None,
     """Read Parquet with advanced DuckDB optimizations"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
 
         # Build optimized query with performance hints
@@ -266,7 +333,7 @@ def duckdb_aggregate_optimized(path: str, group_by: list, agg_functions: dict,
     """Perform optimized aggregations using DuckDB"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
 
         # Build aggregation query
@@ -303,7 +370,7 @@ def duckdb_join_optimized(left_path: str, right_path: str, on_columns: dict,
     """Perform optimized joins between Parquet files using DuckDB"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
 
         # Build join query
@@ -325,7 +392,7 @@ def get_duckdb_performance_stats() -> dict:
     """Get DuckDB performance statistics and configuration"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return {
                 "version": "Unknown",
                 "error": "DuckDB not available",
@@ -362,7 +429,7 @@ def analyze_parquet_performance(path: str) -> dict:
     """Analyze Parquet file performance characteristics"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return {"error": "DuckDB not available"}
         try:
             # Get file size
@@ -396,7 +463,7 @@ def optimize_parquet_storage(path: str, target_compression: str = "zstd") -> str
     """Optimize Parquet file storage with better compression"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return "DuckDB not available"
         # Create optimized version
         optimized_path = path.replace('.parquet', f'_optimized_{target_compression}.parquet')
@@ -430,7 +497,7 @@ def get_market_stats_optimized() -> dict:
     """Get market statistics using advanced DuckDB optimizations"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return {
                 "total_markets": 0,
                 "active_markets": 0,
@@ -469,7 +536,7 @@ def get_top_markets_by_volume(limit: int = 10, min_volume: int = 1000) -> pd.Dat
     """Get top markets by volume using advanced DuckDB optimizations"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
     query = f"""
         SELECT 
@@ -492,7 +559,7 @@ def get_markets_by_series(series_ticker: str, min_volume: int = 100) -> pd.DataF
     """Get all markets for a specific series using DuckDB with filtering"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
     query = """
         SELECT 
@@ -514,7 +581,7 @@ def get_candle_data_optimized(ticker: str, hours: int = 24, use_sampling: bool =
     """Get optimized candle data with optional sampling for performance"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
     end_ts = int(datetime.datetime.now().timestamp())
     start_ts = end_ts - (hours * 3600)
@@ -550,7 +617,7 @@ def batch_process_parquets(directory: str, operation: str, **kwargs) -> dict:
     
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return {"error": "DuckDB not available"}
         for file in parquet_files:
             file_path = os.path.join(directory, file)
@@ -579,7 +646,7 @@ def get_market_correlation_analysis(market_tickers: list, days: int = 30) -> pd.
     # Implementation depends on your specific needs
     pass
 
-@st.cache_resource
+@safe_cache_resource()
 def get_client() -> KalshiClient:
     """
     Returns a singleton KalshiClient for any non-cached calls you might still need.
@@ -598,7 +665,7 @@ def get_client() -> KalshiClient:
         # Fall back to API Key ID for Bearer token authentication (public endpoints only)
         return KalshiClient(api_key=API_KEY)
 
-@st.cache_data(ttl=300)
+@safe_cache_data(ttl=300)
 def load_active_markets(api_key: str, page_size: int = 1000) -> pd.DataFrame:
     # ── your existing fetch + filtering logic ─────────────────
     client = KalshiClient(api_key=api_key)
@@ -619,17 +686,17 @@ def load_active_markets(api_key: str, page_size: int = 1000) -> pd.DataFrame:
     
     return df
 
-@st.cache_data(ttl=60)
+@safe_cache_data(ttl=60)
 def load_active_markets_from_store() -> pd.DataFrame:
     # instant read from Parquet, zero API calls
     return duckdb_read_optimized(ACTIVE_MARKETS_PQ)
 
-@st.cache_data(ttl=300)
+@safe_cache_data(ttl=300)
 def get_summary_df_store() -> pd.DataFrame:
     # if you want to materialize get_summary_df into Parquet too:
     return duckdb_read_optimized(SUMMARY_MARKETS_PQ)
 
-@st.cache_data(ttl=300)
+@safe_cache_data(ttl=300)
 def get_summary_df(api_key: str, page_size: int = 1000) -> pd.DataFrame:
     """
     Builds and caches the cleaned summary table for the Markets page.
@@ -699,7 +766,7 @@ def compute_stats(df: pd.DataFrame) -> dict:
     }
 
 # ── Enhanced Event-to-Series Mapping with DuckDB ─────────────────
-@st.cache_data(ttl=3600)
+@safe_cache_data(ttl=3600)
 def get_events_to_series_mapping(api_key: str) -> dict:
     """Optimized: Only fetch events for active markets with volume >$1k. Much faster than fetching all 55k+ events."""
     # Get the actual markets we care about first
@@ -748,13 +815,13 @@ def get_events_to_series_mapping(api_key: str) -> dict:
     
     return events_mapping
 
-@st.cache_data(ttl=600)
+@safe_cache_data(ttl=600)
 def load_series_list(api_key: str) -> list[dict]:
     client = KalshiClient(api_key=api_key)
     return client.get_series().get("series", [])
 
 # ── Enhanced Candle Loading with DuckDB ──────────────────────────
-@st.cache_data(ttl=300)
+@safe_cache_data(ttl=300)
 def load_candles_from_store(
     ticker: str,
     granularity: str,
@@ -834,7 +901,7 @@ def load_candles_from_store(
     return read_parquet(path)
 
 # ── Enhanced Volume Computation with DuckDB ──────────────────────
-@st.cache_data(ttl=600)
+@safe_cache_data(ttl=600)
 def compute_group_volumes(api_key: str, series_list: list[dict]) -> pd.DataFrame:
     """Optimized: reuse existing markets data instead of duplicate API calls"""
     # 1) Get cached event-to-series mapping
@@ -867,7 +934,7 @@ def compute_group_volumes(api_key: str, series_list: list[dict]) -> pd.DataFrame
 
     return grouped.sort_values("volume_24h", ascending=False)
 
-@st.cache_data(ttl=600)
+@safe_cache_data(ttl=600)
 def load_series_data_from_store(volume_threshold: int = 1000):
     series_list = load_series_list(API_KEY)
 
@@ -890,7 +957,7 @@ def get_market_stats_optimized() -> dict:
     """Get market statistics using DuckDB for performance"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return {
                 "total_markets": 0,
                 "active_markets": 0,
@@ -925,7 +992,7 @@ def get_top_markets_by_volume(limit: int = 10) -> pd.DataFrame:
     """Get top markets by volume using DuckDB"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
     query = f"""
         SELECT 
@@ -946,7 +1013,7 @@ def get_markets_by_series(series_ticker: str) -> pd.DataFrame:
     """Get all markets for a specific series using DuckDB"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
     query = """
         SELECT 
@@ -966,7 +1033,7 @@ def get_candle_data_optimized(ticker: str, hours: int = 24) -> pd.DataFrame:
     """Get optimized candle data for a specific time range"""
     with duckdb_context() as con:
         if con is None:
-            st.error("DuckDB connection is not available.")
+            safe_error("DuckDB connection is not available.")
             return pd.DataFrame()
     end_ts = int(datetime.datetime.now().timestamp())
     start_ts = end_ts - (hours * 3600)
@@ -1039,12 +1106,13 @@ def make_ticker_clickable(ticker: str, display_text: str = None, key: str = None
         key = f"ticker_{ticker}"
     
     # Create a button that looks like a clickable link
-    if st.button(display_text, key=key, help=f"Click to view {ticker} on Overview page"):
+    if safe_button(display_text, key=key, help=f"Click to view {ticker} on Overview page"):
         # Store the selected ticker in session state
-        st.session_state.selected_ticker = ticker
-        st.session_state.selected_title = display_text
+        session_state = safe_session_state()
+        session_state.selected_ticker = ticker
+        session_state.selected_title = display_text
         # Switch to Overview page
-        st.switch_page("pages/Overview.py")
+        safe_switch_page("pages/Overview.py")
         return True
     
     return False
@@ -1068,12 +1136,13 @@ def make_title_clickable(title: str, ticker: str = None, key: str = None) -> boo
     target = ticker if ticker else title
     
     # Create a button that looks like a clickable link
-    if st.button(title, key=key, help=f"Click to view {target} on Overview page"):
+    if safe_button(title, key=key, help=f"Click to view {target} on Overview page"):
         # Store the selected ticker/title in session state
-        st.session_state.selected_ticker = target
-        st.session_state.selected_title = title
+        session_state = safe_session_state()
+        session_state.selected_ticker = target
+        session_state.selected_title = title
         # Switch to Overview page
-        st.switch_page("pages/Overview.py")
+        safe_switch_page("pages/Overview.py")
         return True
     
     return False
