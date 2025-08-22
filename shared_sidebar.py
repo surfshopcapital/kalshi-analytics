@@ -1,4 +1,5 @@
 # shared_sidebar.py
+# CACHE_BUSTER: 20250822042000 - FORCE RELOAD
 
 # Safe import with fallback
 try:
