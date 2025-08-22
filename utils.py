@@ -65,7 +65,7 @@ except Exception as e:
         traceback.print_exc()
 
 # ── CRITICAL: Ensure get_data_source_status is always available ─────────────────
-def get_data_source_status() -> dict:
+def get_data_source_status_v2() -> dict:
     """
     Get status of all data sources.
     This is a fallback version that's always available.
@@ -1386,6 +1386,10 @@ def get_unified_summary(data_sources: list = None) -> pd.DataFrame:
     # Combine summaries
     combined_summary = pd.concat(all_summaries, ignore_index=True)
     return combined_summary
+
+# ── COMPATIBILITY ALIAS ─────────────────────────────────────────────────────
+# Keep the old function name for backward compatibility
+get_data_source_status = get_data_source_status_v2
 
 
 
