@@ -12,17 +12,12 @@ def render_shared_sidebar():
         # ── Data Source Selection ─────────────────────────────────────────────
         st.sidebar.markdown("## 📊 Data Source")
         
-        # Try to get data source status with error handling
-        try:
-            from utils import get_data_source_status
-            data_status = get_data_source_status()
-        except Exception as e:
-            st.sidebar.warning(f"⚠️ Error loading data status: {str(e)}")
-            # Fallback to basic selection without status
-            data_status = {
-                'kalshi': {'available': True, 'markets_count': 0, 'last_updated': None},
-                'polymarket': {'available': True, 'markets_count': 0, 'last_updated': None}
-            }
+        # TEMPORARY: Don't try to import get_data_source_status until we can push the fix
+        # Instead, use a simple fallback
+        data_status = {
+            'kalshi': {'available': True, 'markets_count': 0, 'last_updated': None},
+            'polymarket': {'available': True, 'markets_count': 0, 'last_updated': None}
+        }
         
         # Create data source selector
         available_sources = []
