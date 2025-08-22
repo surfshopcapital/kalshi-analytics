@@ -212,11 +212,11 @@ if __name__ == "__main__":
         # Refresh active markets
         refresh_active_markets()
         
-        # Build summary table
-        build_summary_table()
+        # Build summary table (fix function name)
+        refresh_summary()  # Changed from build_summary_table()
         
-        # Build series volumes
-        build_series_volumes()
+        # Build series volumes (fix function name)
+        write_series_volumes()  # Changed from build_series_volumes()
         
         # Refresh candles (this might fail on first run, which is OK)
         try:
