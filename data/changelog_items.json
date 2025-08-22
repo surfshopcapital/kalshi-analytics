@@ -1,0 +1,102 @@
+[
+  {
+    "id": "f4e4242e-0795-4e7b-b109-d02cc2e51995",
+    "title": "Add in Polymarket API data",
+    "description": "",
+    "priority": 3,
+    "status": "To Do",
+    "deadline": "2025-08-16",
+    "created_at": "2025-08-09 21:10",
+    "updated_at": "2025-08-09 21:10"
+  },
+  {
+    "id": "aa659cc2-e39d-47a7-8304-228a1d0bdc2d",
+    "title": "Show the implied odds from the overlapping sports markets for \"No\"",
+    "description": "",
+    "priority": 2,
+    "status": "To Do",
+    "deadline": "2025-08-16",
+    "created_at": "2025-08-09 21:10",
+    "updated_at": "2025-08-09 21:10"
+  },
+  {
+    "id": "d3342c95-d737-4b74-a6f3-00d64baaad79",
+    "title": "Bring in equity curve and portfolio stats",
+    "description": "",
+    "priority": 1,
+    "status": "Done",
+    "deadline": "2025-08-10",
+    "created_at": "2025-08-09 21:43",
+    "updated_at": "2025-08-11 23:17"
+  },
+  {
+    "id": "ddc2ccec-f207-400f-915f-06ce583d5e5f",
+    "title": "Implement email system to trigger on new % of Volume and notional movers",
+    "description": "",
+    "priority": 2,
+    "status": "To Do",
+    "deadline": "2025-08-12",
+    "created_at": "2025-08-09 21:51",
+    "updated_at": "2025-08-10 21:34"
+  },
+  {
+    "id": "0ffc1dbb-d670-4928-b01f-8114609123df",
+    "title": "Check for correlated markets (AI Market)",
+    "description": "",
+    "priority": 2,
+    "status": "To Do",
+    "deadline": "2025-08-17",
+    "created_at": "2025-08-09 22:15",
+    "updated_at": "2025-08-10 21:34"
+  },
+  {
+    "id": "77c77fb4-a70a-45e7-bc42-2f4794626035",
+    "title": "Maybe a calculator for pricing 1 touch options and bidding on some of these BTC / ETH markets?",
+    "description": "",
+    "priority": 5,
+    "status": "To Do",
+    "deadline": "2025-08-17",
+    "created_at": "2025-08-10 20:37",
+    "updated_at": "2025-08-10 20:37"
+  },
+  {
+    "id": "bca3d9ff-a242-4333-a6fa-de2f8e0f8b6e",
+    "title": "For the series page, add in an option to lookup a certain subseries, even if it doesn't meet the criteria",
+    "description": "",
+    "priority": 3,
+    "status": "To Do",
+    "deadline": "2025-08-17",
+    "created_at": "2025-08-10 21:21",
+    "updated_at": "2025-08-10 21:21"
+  },
+  {
+    "id": "1dc75068-a57d-4b4b-9363-0ab3e07c3520",
+    "title": "Get into golf modeling and see what needs to be done here? Why is it so popular?",
+    "description": "",
+    "priority": 2,
+    "status": "To Do",
+    "deadline": "2025-08-13",
+    "created_at": "2025-08-10 21:34",
+    "updated_at": "2025-08-10 21:34"
+  },
+  {
+    "id": "4202bb67-bd3b-4f4f-903d-744501ec2271",
+    "title": "Look at websockets for portfolio - maybe this is easier than the API? Doubt it but worth a shot if can't get the API to work",
+    "description": "",
+    "priority": 3,
+    "status": "Done",
+    "deadline": "2025-08-17",
+    "created_at": "2025-08-10 22:00",
+    "updated_at": "2025-08-11 23:18"
+  },
+  {
+    "id": "85522ea9-986e-42c7-af60-f0b09b8b7c36",
+    "title": "Github / Version Control",
+    "description": "",
+    "priority": 1,
+    "status": "To Do",
+    "deadline": "2025-08-12",
+    "created_at": "2025-08-11 23:24",
+    "updated_at": "2025-08-11 23:24"
+  }
+]
