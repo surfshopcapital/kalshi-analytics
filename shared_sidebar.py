@@ -8,11 +8,36 @@ except ImportError:
     STREAMLIT_AVAILABLE = False
     st = None
 
+# Add debug imports
+try:
+    import traceback
+    import sys
+    import os
+    DEBUG_AVAILABLE = True
+except ImportError:
+    DEBUG_AVAILABLE = False
+    traceback = None
+    sys = None
+    os = None
+
 def render_shared_sidebar():
     """
     Render a shared sidebar component that appears on all pages.
     This maintains the data source selection across page navigation.
     """
+    
+    # Debug logging
+    try:
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: Starting render_shared_sidebar()")
+            print(f"🔍 DEBUG: STREAMLIT_AVAILABLE = {STREAMLIT_AVAILABLE}")
+            print(f"🔍 DEBUG: st object = {st}")
+            print(f"🔍 DEBUG: Python version = {sys.version}")
+            print(f"🔍 DEBUG: Current working directory = {os.getcwd() if os else 'os not available'}")
+    except Exception as debug_e:
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG ERROR: {debug_e}")
+            traceback.print_exc()
     
     if not STREAMLIT_AVAILABLE or st is None:
         # Fallback for non-Streamlit environments
@@ -20,8 +45,12 @@ def render_shared_sidebar():
         return
     
     try:
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: About to render sidebar markdown")
         # ── Data Source Selection ─────────────────────────────────────────────
         st.sidebar.markdown("## 📊 Data Source")
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: Sidebar markdown rendered successfully")
         
         # Simple fallback data status - no external dependencies
         data_status = {
@@ -93,6 +122,10 @@ def render_shared_sidebar():
             st.session_state.selected_data_source = None
             
     except Exception as e:
+        if DEBUG_AVAILABLE:
+            print(f"🔍 DEBUG: Error in sidebar rendering: {e}")
+            print(f"🔍 DEBUG: Error type: {type(e)}")
+            traceback.print_exc()
         # Fallback if anything goes wrong
         try:
             st.sidebar.error(f"⚠️ Sidebar error: {str(e)}")

@@ -3,6 +3,35 @@
 import streamlit as st
 from shared_sidebar import render_shared_sidebar, get_selected_data_sources, get_selected_data_source_display
 
+# Add debug imports
+try:
+    import traceback
+    import sys
+    DEBUG_AVAILABLE = True
+except ImportError:
+    DEBUG_AVAILABLE = False
+    traceback = None
+    sys = None
+
+def debug_dashboard_startup():
+    """Debug function to check dashboard startup"""
+    if DEBUG_AVAILABLE:
+        print(f"🔍 DEBUG: Dashboard.py starting up")
+        print(f"🔍 DEBUG: Python version = {sys.version}")
+        print(f"🔍 DEBUG: Available modules = {[m for m in sys.modules.keys() if 'utils' in m or 'shared_sidebar' in m]}")
+    return True
+
+# Call this before render_shared_sidebar()
+try:
+    debug_dashboard_startup()
+    render_shared_sidebar()
+except Exception as e:
+    if DEBUG_AVAILABLE:
+        print(f"🔍 DEBUG: Error in dashboard startup: {e}")
+        print(f"🔍 DEBUG: Error type: {type(e)}")
+        traceback.print_exc()
+    st.error(f"Dashboard startup error: {e}")
+
 # Global Streamlit configuration
 st.set_page_config(
     page_title="Market Analytics Dashboard",
@@ -11,7 +40,7 @@ st.set_page_config(
 )
 
 # ── Render Shared Sidebar ─────────────────────────────────────────────
-render_shared_sidebar()
+# render_shared_sidebar() # This line is now handled by the try-except block above
 
 # ── Main Dashboard Content ─────────────────────────────────────────────
 st.markdown("""
