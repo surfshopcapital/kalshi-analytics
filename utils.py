@@ -1,12 +1,5 @@
 # utils.py
 
-# Try to import streamlit, but make it optional to prevent import errors
-try:
-    import streamlit as st
-    STREAMLIT_AVAILABLE = True
-except ImportError:
-    STREAMLIT_AVAILABLE = False
-    st = None
 
 import pandas as pd
 
@@ -23,6 +16,15 @@ except ImportError:
     datetime = None
     time = None
     contextmanager = None
+
+# Try to import streamlit, but make it optional to prevent import errors
+try:
+    import streamlit as st
+    STREAMLIT_AVAILABLE = True
+except ImportError:
+    STREAMLIT_AVAILABLE = False
+    st = None
+
 
 # Helper functions for Streamlit decorators when streamlit is not available
 def safe_cache_data(ttl=None):
