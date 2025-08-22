@@ -38,11 +38,14 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 # Move directory creation to a function to avoid issues during import
 def ensure_directories():
     """Ensure all required directories exist"""
-    os.makedirs(DATA_DIR, exist_ok=True)
-    os.makedirs(os.path.join(DATA_DIR, "candles"), exist_ok=True)
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        os.makedirs(os.path.join(DATA_DIR, "candles"), exist_ok=True)
+    except Exception as e:
+        print(f"Warning: Could not create directories: {e}")
 
-# Call this function when needed instead of during import
-ensure_directories()
+# Don't call this during import - call it when needed instead
+# ensure_directories()  # Commented out to prevent import errors
 
 # File paths
 ACTIVE_MARKETS_PQ = os.path.join(DATA_DIR, "active_markets.parquet")
