@@ -1,8 +1,18 @@
 # utils.py
-# VERSION: 2025-08-22-02 - Force reload for Streamlit Cloud
-# TIMESTAMP: 2025-08-22 04:06:00 UTC
+# VERSION: 2025-08-22-03 - FORCE RELOAD - CACHE BUSTING
+# TIMESTAMP: 2025-08-22 04:15:00 UTC
+# CACHE_KEY: 20250822041500
 
 import pandas as pd
+
+# Force module reload by changing the module object
+import sys
+if 'utils' in sys.modules:
+    # Delete the old module completely
+    del sys.modules['utils']
+    # Force Python to reload this module
+    import importlib
+    importlib.invalidate_caches()
 
 # Safe import for os and datetime
 try:
