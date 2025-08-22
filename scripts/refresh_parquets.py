@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import datetime  # Add this import
 
 # ── Stub out Streamlit decorators so utils can import safely ─────
 import streamlit as _st
@@ -113,11 +114,11 @@ def tickers_with_min_volume(min_volume: int, days: int, granularity: str) -> lis
             print(f"📊 No {granularity} candle files found yet. Will create them during refresh.")
             return []
         
-        # If we have files, proceed with the query
+        # If we have files, proceed with the query - FIXED SYNTAX
         q = f"""
             SELECT DISTINCT 
                 REPLACE(filename, 'candles_', '') as ticker
-            FROM read_dir('{candles_dir}', glob='candles_*_{granularity}.parquet')
+            FROM read_dir('{candles_dir}')
             WHERE filename LIKE 'candles_%_{granularity}.parquet'
         """
         
