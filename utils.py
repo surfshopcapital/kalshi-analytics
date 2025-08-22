@@ -1,7 +1,7 @@
 # utils.py
-# VERSION: 2025-08-22-04 - FINAL FIX - FORCE RELOAD
-# TIMESTAMP: 2025-08-22 04:25:00 UTC
-# CACHE_KEY: 20250822042500
+# VERSION: 2025-08-22-05 - CLEAN FIX - NO DEBUG INTERFERENCE
+# TIMESTAMP: 2025-08-22 04:35:00 UTC
+# CACHE_KEY: 20250822043500
 
 import pandas as pd
 
@@ -31,15 +31,7 @@ except ImportError:
     traceback = None
     sys = None
 
-def debug_import_status():
-    """Debug function to check what's available"""
-    if DEBUG_AVAILABLE:
-        print(f"🔍 DEBUG: utils.py import status:")
-        print(f"🔍 DEBUG: Python version = {sys.version}")
-        print(f"🔍 DEBUG: STREAMLIT_AVAILABLE = {STREAMLIT_AVAILABLE}")
-        print(f"🔍 DEBUG: OS_AVAILABLE = {OS_AVAILABLE}")
-        print(f"🔍 DEBUG: Available functions = {[f for f in dir() if not f.startswith('_')]}")
-    return True
+# Debug function removed to prevent import issues
 
 # Try to import streamlit, but make it optional to prevent import errors
 try:
@@ -1378,16 +1370,8 @@ def get_unified_summary(data_sources: list = None) -> pd.DataFrame:
 # Keep the old function name for backward compatibility
 get_data_source_status = get_data_source_status_v2
 
-# ── DEBUG: Call this at the end to verify all functions are available ─────────────────
-try:
-    if DEBUG_AVAILABLE:
-        print(f"🔍 DEBUG: utils.py import completed successfully")
-        print(f"🔍 DEBUG: Total functions defined: {len([f for f in dir() if not f.startswith('_')])}")
-        print(f"🔍 DEBUG: Key functions available: {[f for f in dir() if not f.startswith('_') and 'get_' in f][:5]}")
-except Exception as e:
-    if DEBUG_AVAILABLE:
-        print(f"🔍 DEBUG: Error in debug_import_status: {e}")
-        traceback.print_exc()
+# ── MODULE IMPORT COMPLETED ─────────────────────────────────────────────────────
+# All functions should now be available for import
 
 
 
