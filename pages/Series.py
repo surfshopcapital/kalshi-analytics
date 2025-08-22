@@ -6,15 +6,42 @@ import altair as alt
 import datetime
 import numpy as np
 from html import escape
-from kalshi_client import KalshiClient
-from utils import load_series_data_from_store, API_KEY, get_volume_columns, load_candles_from_store, make_ticker_clickable, make_title_clickable
-import datetime
+
+# Safe imports with fallbacks
+try:
+    from kalshi_client import KalshiClient
+    KALSHI_CLIENT_AVAILABLE = True
+except ImportError:
+    KALSHI_CLIENT_AVAILABLE = False
+    KalshiClient = None
+
+try:
+    from utils import load_series_data_from_store, API_KEY, get_volume_columns, load_candles_from_store, make_ticker_clickable, make_title_clickable
+    UTILS_AVAILABLE = True
+except ImportError as e:
+    UTILS_AVAILABLE = False
+    print(f"Warning: Could not import from utils: {e}")
+    # Create fallback values
+    API_KEY = ""
+    def load_series_data_from_store(volume_threshold=1000):
+        return [], pd.DataFrame()
+    def get_volume_columns(df):
+        return pd.Series(0, index=df.index), pd.Series(0, index=df.index)
+    def load_candles_from_store(ticker, granularity, start_ts, end_ts):
+        return pd.DataFrame()
+    def make_ticker_clickable(ticker, display_text=None, key=None):
+        return False
+    def make_title_clickable(title, ticker=None, key=None):
+        return False
 
 @st.cache_data(ttl=300)
 def load_markets_for_series(series_ticker: str) -> pd.DataFrame:
     """
     Fetch all markets (open + closed) in a given series.
     """
+    if not KALSHI_CLIENT_AVAILABLE:
+        st.warning("KalshiClient is not available. Cannot fetch markets.")
+        return pd.DataFrame()
     client = KalshiClient(api_key=API_KEY)
     resp = client.get_markets(limit=1000, series_ticker=series_ticker, status="open")
     return pd.DataFrame(resp.get("markets", []))

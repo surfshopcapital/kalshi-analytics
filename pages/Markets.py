@@ -3,15 +3,55 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils import (
-    get_unified_markets, 
-    get_markets_by_source, 
-    get_volume_columns, 
-    make_ticker_clickable, 
-    make_title_clickable
-)
-from shared_sidebar import render_shared_sidebar, get_selected_data_sources, get_selected_data_source_display
-import duckdb
+
+# Safe imports with fallbacks
+try:
+    from utils import (
+        get_unified_markets, 
+        get_markets_by_source, 
+        get_volume_columns, 
+        make_ticker_clickable, 
+        make_title_clickable
+    )
+    UTILS_AVAILABLE = True
+except ImportError as e:
+    UTILS_AVAILABLE = False
+    print(f"Warning: Could not import from utils: {e}")
+    # Create fallback functions
+    def get_unified_markets(data_sources):
+        return pd.DataFrame()
+    def get_markets_by_source(data_source):
+        return pd.DataFrame()
+    def get_volume_columns(df):
+        return pd.Series(0, index=df.index), pd.Series(0, index=df.index)
+    def make_ticker_clickable(ticker, display_text=None, key=None):
+        return False
+    def make_title_clickable(title, ticker=None, key=None):
+        return False
+
+try:
+    from shared_sidebar import render_shared_sidebar, get_selected_data_sources, get_selected_data_source_display
+    SIDEBAR_AVAILABLE = True
+except ImportError as e:
+    SIDEBAR_AVAILABLE = False
+    print(f"Warning: Could not import from shared_sidebar: {e}")
+    # Create fallback functions
+    def render_shared_sidebar():
+        st.sidebar.markdown("## 📊 Data Source")
+        st.sidebar.markdown("**Kalshi** (default)")
+    def get_selected_data_sources():
+        return ['kalshi']
+    def get_selected_data_source_display():
+        return "Kalshi (default)"
+
+# Safe imports for other dependencies
+try:
+    import duckdb
+    DUCKDB_AVAILABLE = True
+except ImportError:
+    DUCKDB_AVAILABLE = False
+    duckdb = None
+
 import urllib.parse
 import os
 

@@ -1,6 +1,12 @@
 # shared_sidebar.py
 
-import streamlit as st
+# Safe import with fallback
+try:
+    import streamlit as st
+    STREAMLIT_AVAILABLE = True
+except ImportError:
+    STREAMLIT_AVAILABLE = False
+    st = None
 
 def render_shared_sidebar():
     """
@@ -8,12 +14,16 @@ def render_shared_sidebar():
     This maintains the data source selection across page navigation.
     """
     
+    if not STREAMLIT_AVAILABLE or st is None:
+        # Fallback for non-Streamlit environments
+        print("Streamlit not available - using fallback sidebar")
+        return
+    
     try:
         # ── Data Source Selection ─────────────────────────────────────────────
         st.sidebar.markdown("## 📊 Data Source")
         
-        # TEMPORARY: Don't try to import get_data_source_status until we can push the fix
-        # Instead, use a simple fallback
+        # Simple fallback data status - no external dependencies
         data_status = {
             'kalshi': {'available': True, 'markets_count': 0, 'last_updated': None},
             'polymarket': {'available': True, 'markets_count': 0, 'last_updated': None}
@@ -96,6 +106,9 @@ def get_selected_data_sources():
     Returns:
         list: List of data source names to include
     """
+    if not STREAMLIT_AVAILABLE or st is None:
+        return ['kalshi']  # Default fallback
+    
     selected = st.session_state.get('selected_data_source', 'Both')
     
     if selected == 'Both':
@@ -105,14 +118,17 @@ def get_selected_data_sources():
     elif selected == 'Polymarket':
         return ['polymarket']
     else:
-        # Fallback to both if something goes wrong
-        return ['kalshi', 'polymarket']
+        return ['kalshi']  # Default fallback
 
 def get_selected_data_source_display():
     """
-    Get the human-readable name of the currently selected data source.
+    Get a human-readable string for the selected data source.
     
     Returns:
-        str: Display name of the selected data source
+        str: Display string for the selected data source
     """
-    return st.session_state.get('selected_data_source', 'Both')
+    if not STREAMLIT_AVAILABLE or st is None:
+        return "Kalshi (default)"
+    
+    selected = st.session_state.get('selected_data_source', 'Both')
+    return selected if selected else "Kalshi (default)"

@@ -8,14 +8,44 @@ from requests.exceptions import HTTPError
 import numpy as np
 import os
 
-from utils import (
-    API_KEY, 
-    get_client, 
-    get_unified_markets, 
-    get_markets_by_source, 
-    load_candles_from_store
-)
-from shared_sidebar import render_shared_sidebar, get_selected_data_sources, get_selected_data_source_display
+# Safe imports with fallbacks
+try:
+    from utils import (
+        API_KEY, 
+        get_client, 
+        get_unified_markets, 
+        get_markets_by_source, 
+        load_candles_from_store
+    )
+    UTILS_AVAILABLE = True
+except ImportError as e:
+    UTILS_AVAILABLE = False
+    print(f"Warning: Could not import from utils: {e}")
+    # Create fallback values
+    API_KEY = ""
+    def get_client():
+        return None
+    def get_unified_markets(data_sources):
+        return pd.DataFrame()
+    def get_markets_by_source(data_source):
+        return pd.DataFrame()
+    def load_candles_from_store(ticker, granularity, start_ts, end_ts):
+        return pd.DataFrame()
+
+try:
+    from shared_sidebar import render_shared_sidebar, get_selected_data_sources, get_selected_data_source_display
+    SIDEBAR_AVAILABLE = True
+except ImportError as e:
+    SIDEBAR_AVAILABLE = False
+    print(f"Warning: Could not import from shared_sidebar: {e}")
+    # Create fallback functions
+    def render_shared_sidebar():
+        st.sidebar.markdown("## 📊 Data Source")
+        st.sidebar.markdown("**Kalshi** (default)")
+    def get_selected_data_sources():
+        return ['kalshi']
+    def get_selected_data_source_display():
+        return "Kalshi (default)"
 
 def create_line_chart(df: pd.DataFrame, title: str) -> alt.Chart:
     """
