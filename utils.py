@@ -9,10 +9,20 @@ except ImportError:
     st = None
 
 import pandas as pd
-import datetime
-import os
-import time
-from contextlib import contextmanager
+
+# Safe import for os and datetime
+try:
+    import os
+    import datetime
+    import time
+    from contextlib import contextmanager
+    OS_AVAILABLE = True
+except ImportError:
+    OS_AVAILABLE = False
+    os = None
+    datetime = None
+    time = None
+    contextmanager = None
 
 # Helper functions for Streamlit decorators when streamlit is not available
 def safe_cache_data(ttl=None):
@@ -1394,3 +1404,5 @@ def get_data_source_status() -> dict:
                 'last_updated': None
             }
         }
+
+
