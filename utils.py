@@ -1,5 +1,6 @@
 # utils.py
-
+# VERSION: 2025-08-22-02 - Force reload for Streamlit Cloud
+# TIMESTAMP: 2025-08-22 04:06:00 UTC
 
 import pandas as pd
 
