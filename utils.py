@@ -3,31 +3,53 @@
 import streamlit as st
 import pandas as pd
 import datetime
-from kalshi_client import KalshiClient
-from requests.exceptions import HTTPError
-import requests
-import time
 import os
-import duckdb
+import time
 from contextlib import contextmanager
 
+# Try to import optional dependencies
+try:
+    from kalshi_client import KalshiClient
+    KALSHI_AVAILABLE = True
+except ImportError:
+    KALSHI_AVAILABLE = False
+    KalshiClient = None
+
+try:
+    from requests.exceptions import HTTPError
+    import requests
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
+    HTTPError = None
+    requests = None
+
+try:
+    import duckdb
+    DUCKDB_AVAILABLE = True
+except ImportError:
+    DUCKDB_AVAILABLE = False
+    duckdb = None
+
 # ── Define your data directories here ─────────────────────────────
-BASE_DIR     = os.path.dirname(__file__)
-DATA_DIR     = os.path.join(BASE_DIR, "data")
-os.makedirs(DATA_DIR, exist_ok=True)
+BASE_DIR = os.path.dirname(__file__)
+DATA_DIR = os.path.join(BASE_DIR, "data")
 
-# Ensure changelog data directory exists
-CHANGELOG_FILE = os.path.join(DATA_DIR, "changelog.json")
+# Move directory creation to a function to avoid issues during import
+def ensure_directories():
+    """Ensure all required directories exist"""
+    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(os.path.join(DATA_DIR, "candles"), exist_ok=True)
 
+# Call this function when needed instead of during import
+ensure_directories()
+
+# File paths
 ACTIVE_MARKETS_PQ = os.path.join(DATA_DIR, "active_markets.parquet")
 SUMMARY_MARKETS_PQ = os.path.join(DATA_DIR, "summary_markets.parquet")
-
-# NEW: candles subdirectory
 CANDLES_DIR = os.path.join(DATA_DIR, "candles")
-os.makedirs(CANDLES_DIR, exist_ok=True)
-
-# after you define DATA_DIR, summarize PQ and before other functions
 SERIES_VOLUMES_PQ = os.path.join(DATA_DIR, "series_volumes.parquet")
+CHANGELOG_FILE = os.path.join(DATA_DIR, "changelog.json")
 
 # NEW: Polymarket data files
 POLYMARKET_MARKETS_PQ = os.path.join(DATA_DIR, "polymarket_markets.parquet")
@@ -52,17 +74,17 @@ if os.path.exists(_local_config_path):
         assert spec and spec.loader
         spec.loader.exec_module(md_config)
         API_KEY = getattr(md_config, "KALSHI_API_KEY_ID", "")
-        PRIVATE_KEY = getattr(md_config, "KALSHI_PRIVATE_KEY", "")
+        PRIVATE_KEY = getattr(md_config, "KALSHI_API_PRIVATE_KEY", "")
         PRIVATE_KEY_PATH = getattr(md_config, "KALSHI_PRIVATE_KEY_PATH", "")
     except Exception:
         # Fall back to env vars if local config load fails
         API_KEY = os.getenv('KALSHI_API_KEY_ID', "")
-        PRIVATE_KEY = os.getenv('KALSHI_PRIVATE_KEY', "")
+        PRIVATE_KEY = os.getenv('KALSHI_API_PRIVATE_KEY', "")
         PRIVATE_KEY_PATH = os.getenv('KALSHI_PRIVATE_KEY_PATH', "")
 else:
     # No local config file; use environment variables
     API_KEY = os.getenv('KALSHI_API_KEY_ID', "")
-    PRIVATE_KEY = os.getenv('KALSHI_PRIVATE_KEY', "")
+    PRIVATE_KEY = os.getenv('KALSHI_API_PRIVATE_KEY', "")
     PRIVATE_KEY_PATH = os.getenv('KALSHI_PRIVATE_KEY_PATH', "")
 
 # ── Authentication helpers ─────────────────────────────────────────────
@@ -89,6 +111,10 @@ def get_auth_status() -> dict:
 @st.cache_resource
 def get_duckdb_connection():
     """Get a cached DuckDB connection with advanced optimizations"""
+    if not DUCKDB_AVAILABLE:
+        st.error("DuckDB is not available. Please install it with: pip install duckdb")
+        return None
+        
     con = duckdb.connect(':memory:')
     
     # Enable advanced optimizations (only set once per connection)
@@ -109,6 +135,10 @@ def get_duckdb_connection():
 
 def get_fresh_duckdb_connection():
     """Get a fresh DuckDB connection for operations that need it"""
+    if not DUCKDB_AVAILABLE:
+        st.error("DuckDB is not available. Please install it with: pip install duckdb")
+        return None
+        
     con = duckdb.connect(':memory:')
     
     # Enable advanced optimizations
@@ -132,6 +162,9 @@ def duckdb_context():
     """Context manager for DuckDB operations with automatic cleanup"""
     # Always use a fresh connection to avoid caching issues
     con = get_fresh_duckdb_connection()
+    if con is None:
+        yield None # Return None if DuckDB is not available
+        return
     try:
         yield con
     finally:
@@ -142,6 +175,10 @@ def duckdb_context():
 def duckdb_query_optimized(query: str, params: dict = None, explain: bool = False) -> pd.DataFrame:
     """Execute optimized DuckDB query with performance monitoring"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
+
         # Add query optimization hints
         if "SELECT" in query.upper() and "FROM" in query.upper():
             # Add LIMIT if not present for large queries
@@ -166,6 +203,9 @@ def duckdb_write_optimized(df: pd.DataFrame, path: str, compression: str = "snap
                           row_group_size: int = 100000) -> None:
     """Write DataFrame to Parquet using DuckDB with advanced optimizations"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return
         # Register DataFrame as a temporary table
         con.register("temp_df", df)
         
@@ -183,6 +223,10 @@ def duckdb_read_optimized(path: str, columns: list = None, filters: dict = None,
                          limit: int = None) -> pd.DataFrame:
     """Read Parquet with advanced DuckDB optimizations"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
+
         # Build optimized query with performance hints
         if columns:
             cols_str = ", ".join(columns)
@@ -218,6 +262,10 @@ def duckdb_aggregate_optimized(path: str, group_by: list, agg_functions: dict,
                               filters: dict = None) -> pd.DataFrame:
     """Perform optimized aggregations using DuckDB"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
+
         # Build aggregation query
         agg_parts = []
         for col, func in agg_functions.items():
@@ -251,6 +299,10 @@ def duckdb_join_optimized(left_path: str, right_path: str, on_columns: dict,
                          join_type: str = "INNER") -> pd.DataFrame:
     """Perform optimized joins between Parquet files using DuckDB"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
+
         # Build join query
         join_conditions = []
         for left_col, right_col in on_columns.items():
@@ -269,6 +321,13 @@ def duckdb_join_optimized(left_path: str, right_path: str, on_columns: dict,
 def get_duckdb_performance_stats() -> dict:
     """Get DuckDB performance statistics and configuration"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return {
+                "version": "Unknown",
+                "error": "DuckDB not available",
+                "connection_active": False
+            }
         try:
             # Get DuckDB version and configuration
             version = con.execute("SELECT version()").fetchone()[0]
@@ -299,6 +358,9 @@ def get_duckdb_performance_stats() -> dict:
 def analyze_parquet_performance(path: str) -> dict:
     """Analyze Parquet file performance characteristics"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return {"error": "DuckDB not available"}
         try:
             # Get file size
             file_size = os.path.getsize(path) / (1024 * 1024)  # MB
@@ -330,6 +392,9 @@ def analyze_parquet_performance(path: str) -> dict:
 def optimize_parquet_storage(path: str, target_compression: str = "zstd") -> str:
     """Optimize Parquet file storage with better compression"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return "DuckDB not available"
         # Create optimized version
         optimized_path = path.replace('.parquet', f'_optimized_{target_compression}.parquet')
         
@@ -361,6 +426,17 @@ def optimize_parquet_storage(path: str, target_compression: str = "zstd") -> str
 def get_market_stats_optimized() -> dict:
     """Get market statistics using advanced DuckDB optimizations"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return {
+                "total_markets": 0,
+                "active_markets": 0,
+                "total_volume": 0,
+                "total_open_interest": 0,
+                "avg_volume": 0,
+                "max_volume": 0,
+                "high_volume_markets": 0
+            }
         # Use optimized aggregation with sampling for large datasets
         query = """
             SELECT 
@@ -388,6 +464,10 @@ def get_market_stats_optimized() -> dict:
 
 def get_top_markets_by_volume(limit: int = 10, min_volume: int = 1000) -> pd.DataFrame:
     """Get top markets by volume using advanced DuckDB optimizations"""
+    with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
     query = f"""
         SELECT 
             ticker,
@@ -407,6 +487,10 @@ def get_top_markets_by_volume(limit: int = 10, min_volume: int = 1000) -> pd.Dat
 
 def get_markets_by_series(series_ticker: str, min_volume: int = 100) -> pd.DataFrame:
     """Get all markets for a specific series using DuckDB with filtering"""
+    with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
     query = """
         SELECT 
             ticker,
@@ -425,6 +509,10 @@ def get_markets_by_series(series_ticker: str, min_volume: int = 100) -> pd.DataF
 
 def get_candle_data_optimized(ticker: str, hours: int = 24, use_sampling: bool = True) -> pd.DataFrame:
     """Get optimized candle data with optional sampling for performance"""
+    with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
     end_ts = int(datetime.datetime.now().timestamp())
     start_ts = end_ts - (hours * 3600)
     
@@ -458,6 +546,9 @@ def batch_process_parquets(directory: str, operation: str, **kwargs) -> dict:
     parquet_files = [f for f in os.listdir(directory) if f.endswith('.parquet')]
     
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return {"error": "DuckDB not available"}
         for file in parquet_files:
             file_path = os.path.join(directory, file)
             try:
@@ -795,6 +886,16 @@ def load_series_data_from_store(volume_threshold: int = 1000):
 def get_market_stats_optimized() -> dict:
     """Get market statistics using DuckDB for performance"""
     with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return {
+                "total_markets": 0,
+                "active_markets": 0,
+                "total_volume": 0,
+                "total_open_interest": 0,
+                "avg_volume": 0,
+                "max_volume": 0
+            }
         query = """
             SELECT 
                 COUNT(*) as total_markets,
@@ -819,6 +920,10 @@ def get_market_stats_optimized() -> dict:
 
 def get_top_markets_by_volume(limit: int = 10) -> pd.DataFrame:
     """Get top markets by volume using DuckDB"""
+    with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
     query = f"""
         SELECT 
             ticker,
@@ -836,6 +941,10 @@ def get_top_markets_by_volume(limit: int = 10) -> pd.DataFrame:
 
 def get_markets_by_series(series_ticker: str) -> pd.DataFrame:
     """Get all markets for a specific series using DuckDB"""
+    with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
     query = """
         SELECT 
             ticker,
@@ -852,6 +961,10 @@ def get_markets_by_series(series_ticker: str) -> pd.DataFrame:
 
 def get_candle_data_optimized(ticker: str, hours: int = 24) -> pd.DataFrame:
     """Get optimized candle data for a specific time range"""
+    with duckdb_context() as con:
+        if con is None:
+            st.error("DuckDB connection is not available.")
+            return pd.DataFrame()
     end_ts = int(datetime.datetime.now().timestamp())
     start_ts = end_ts - (hours * 3600)
     
@@ -1088,52 +1201,73 @@ def get_data_source_status() -> dict:
     Returns:
         Dictionary with status information for each data source
     """
-    status = {}
-    
-    # Kalshi status
-    kalshi_markets_exist = os.path.exists(ACTIVE_MARKETS_PQ)
-    kalshi_summary_exist = os.path.exists(SUMMARY_MARKETS_PQ)
-    
-    if kalshi_markets_exist:
-        try:
-            kalshi_df = pd.read_parquet(ACTIVE_MARKETS_PQ)
-            kalshi_count = len(kalshi_df)
-            kalshi_updated = datetime.datetime.fromtimestamp(os.path.getmtime(ACTIVE_MARKETS_PQ))
-        except:
+    try:
+        status = {}
+        
+        # Kalshi status
+        kalshi_markets_exist = os.path.exists(ACTIVE_MARKETS_PQ)
+        kalshi_summary_exist = os.path.exists(SUMMARY_MARKETS_PQ)
+        
+        if kalshi_markets_exist:
+            try:
+                kalshi_df = pd.read_parquet(ACTIVE_MARKETS_PQ)
+                kalshi_count = len(kalshi_df)
+                kalshi_updated = datetime.datetime.fromtimestamp(os.path.getmtime(ACTIVE_MARKETS_PQ))
+            except Exception as e:
+                print(f"Warning: Error reading Kalshi data: {e}")
+                kalshi_count = 0
+                kalshi_updated = None
+        else:
             kalshi_count = 0
             kalshi_updated = None
-    else:
-        kalshi_count = 0
-        kalshi_updated = None
-    
-    status['kalshi'] = {
-        'available': kalshi_markets_exist,
-        'markets_count': kalshi_count,
-        'summary_available': kalshi_summary_exist,
-        'last_updated': kalshi_updated
-    }
-    
-    # Polymarket status
-    polymarket_markets_exist = os.path.exists(POLYMARKET_MARKETS_PQ)
-    polymarket_summary_exist = os.path.exists(POLYMARKET_SUMMARY_PQ)
-    
-    if polymarket_markets_exist:
-        try:
-            polymarket_df = pd.read_parquet(POLYMARKET_MARKETS_PQ)
-            polymarket_count = len(polymarket_df)
-            polymarket_updated = datetime.datetime.fromtimestamp(os.path.getmtime(POLYMARKET_MARKETS_PQ))
-        except:
+        
+        status['kalshi'] = {
+            'available': kalshi_markets_exist,
+            'markets_count': kalshi_count,
+            'summary_available': kalshi_summary_exist,
+            'last_updated': kalshi_updated
+        }
+        
+        # Polymarket status
+        polymarket_markets_exist = os.path.exists(POLYMARKET_MARKETS_PQ)
+        polymarket_summary_exist = os.path.exists(POLYMARKET_SUMMARY_PQ)
+        
+        if polymarket_markets_exist:
+            try:
+                polymarket_df = pd.read_parquet(POLYMARKET_MARKETS_PQ)
+                polymarket_count = len(polymarket_df)
+                polymarket_updated = datetime.datetime.fromtimestamp(os.path.getmtime(POLYMARKET_MARKETS_PQ))
+            except Exception as e:
+                print(f"Warning: Error reading Polymarket data: {e}")
+                polymarket_count = 0
+                polymarket_updated = None
+        else:
             polymarket_count = 0
             polymarket_updated = None
-    else:
-        polymarket_count = 0
-        polymarket_updated = None
-    
-    status['polymarket'] = {
-        'available': polymarket_markets_exist,
-        'markets_count': polymarket_count,
-        'summary_available': polymarket_summary_exist,
-        'last_updated': polymarket_updated
-    }
-    
-    return status
+        
+        status['polymarket'] = {
+            'available': polymarket_markets_exist,
+            'markets_count': polymarket_count,
+            'summary_available': polymarket_summary_exist,
+            'last_updated': polymarket_updated
+        }
+        
+        return status
+        
+    except Exception as e:
+        print(f"Error in get_data_source_status: {e}")
+        # Return safe fallback
+        return {
+            'kalshi': {
+                'available': False,
+                'markets_count': 0,
+                'summary_available': False,
+                'last_updated': None
+            },
+            'polymarket': {
+                'available': False,
+                'markets_count': 0,
+                'summary_available': False,
+                'last_updated': None
+            }
+        }
