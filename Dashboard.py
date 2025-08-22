@@ -30,11 +30,8 @@ if selected_sources:
     sources_text = ", ".join([s.capitalize() for s in selected_sources])
     st.success(f"✅ **Active Data Sources**: {sources_text}")
     
-    # Show total market count
-    from utils import get_data_source_status
-    data_status = get_data_source_status()
-    total_markets = sum(data_status.get(source, {}).get('markets_count', 0) for source in selected_sources)
-    st.info(f"📊 **Total Markets Available**: {total_markets:,}")
+    # TEMPORARY: Don't show market count until we can fix the utils import
+    st.info(f"📊 **Data Source**: {data_source_display}")
 else:
     st.warning("⚠️ Please select at least one data source from the sidebar")
 
@@ -76,24 +73,14 @@ if selected_sources:
     
     with col1:
         st.markdown("### 🔍 Kalshi Markets")
-        if 'kalshi' in selected_sources and data_status.get('kalshi', {}).get('available', False):
-            kalshi_info = data_status['kalshi']
-            st.markdown(f"""
-            - **Markets**: {kalshi_info.get('markets_count', 0):,}
-            - **Summary**: {'✅ Available' if kalshi_info.get('summary_available') else '❌ Not available'}
-            - **Last Updated**: {kalshi_info.get('last_updated', 'Unknown')}
-            """)
+        if 'kalshi' in selected_sources:
+            st.markdown("✅ **Selected** - Data will be loaded when available")
         else:
-            st.markdown("❌ Not selected or unavailable")
+            st.markdown("❌ Not selected")
     
     with col2:
         st.markdown("### 🔗 Polymarket Markets")
-        if 'polymarket' in selected_sources and data_status.get('polymarket', {}).get('available', False):
-            polymarket_info = data_status['polymarket']
-            st.markdown(f"""
-            - **Markets**: {polymarket_info.get('markets_count', 0):,}
-            - **Summary**: {'✅ Available' if polymarket_info.get('summary_available') else '❌ Not available'}
-            - **Last Updated**: {polymarket_info.get('last_updated', 'Unknown')}
-            """)
+        if 'polymarket' in selected_sources:
+            st.markdown("✅ **Selected** - Data will be loaded when available")
         else:
-            st.markdown("❌ Not selected or unavailable")
+            st.markdown("❌ Not selected")
